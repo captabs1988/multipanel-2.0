@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"> <!-- character encoding -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- mobile scaling -->
+<title>DayFlow — Daily Block Planner</title> <!-- page title -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"> <!-- fonts -->
+<style>
+:root{--bg:#f4f6fc;--surface:#fff;--surface2:#f0f2f9;--border:#e0e5f2;--border2:#c8d0e7;--text:#1a2040;--text2:#4a5580;--muted:#8892b0;--accent:#4361ee;--accent2:#7c3aed;--danger:#ef4444;} /* theme colors */
+*{box-sizing:border-box;margin:0;padding:0;} /* reset */
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;user-select:none;}  /* page shell */
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;padding:7px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;box-shadow:0 2px 10px rgba(67,97,238,.08);z-index:50;flex-wrap:nowrap;} /* top row */
+.logo{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent);flex-shrink:0;} /* logo */
+.logo span{color:var(--accent2);} /* logo accent */
+.topbar-mid{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;flex-wrap:nowrap;} /* middle section */
+.topbar-right{display:flex;align-items:center;gap:5px;margin-left:auto;flex-shrink:0;flex-wrap:nowrap;} /* right controls */
+.live-clock{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);background:#eef1fd;padding:4px 9px;border-radius:8px;border:1px solid #d0d9f9;letter-spacing:.4px;white-space:nowrap;}  /* clock */
+
+/* SHIFT/SLEEP COUNTERS */
+.shift-counter{display:none;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:4px 9px;border-radius:8px;white-space:nowrap;align-items:center;gap:5px;} /* shift counter */
+.shift-counter.active{display:flex;} /* show shift counter */
+.sleep-counter{display:none;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;background:#e8eaf5;border:1px solid #7c3aed;color:#7c3aed;padding:4px 9px;border-radius:8px;white-space:nowrap;align-items:center;gap:5px;} /* sleep counter */
+.sleep-counter.active{display:flex;}  /* show sleep counter */
+
+.tz-select{font-family:'DM Sans',sans-serif;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:4px 7px;cursor:pointer;outline:none;max-width:160px;} /* timezone selector */
+.tz-select:focus{border-color:var(--accent);} /* timezone focus */
+.btn{padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;} /* button base */
+.btn:hover{border-color:var(--accent);color:var(--accent);background:#eef1fd;} /* button hover */
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;} /* primary button */
+.btn.primary:hover{background:#2d4fd6;} /* primary hover */
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff;} /* danger button */
+.btn.danger:hover{background:#cc0000;} /* danger hover */
+
+/* SLIDER BAR */
+.slider-bar{display:flex;align-items:center;gap:10px;padding:5px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;} /* slider row */
+.slider-bar label{font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);white-space:nowrap;text-transform:uppercase;letter-spacing:1px;} /* slider label */
+.slider-bar input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;} /* range input */
+#sliderDateLabel{font-size:10px;font-family:'Space Mono',monospace;color:var(--accent);min-width:130px;text-align:right;white-space:nowrap;} /* slider date text */
+
+/* MAIN */
+.main{display:flex;flex:1;overflow:hidden;}  /* main layout */
+
+/* PARKING LOT */
+.parking{width:200px;min-width:200px;background:var(--surface);border-right:2px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:2px 0 8px rgba(67,97,238,.04);} /* left panel */
+.parking-header{padding:8px 10px;font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1.5px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;text-transform:uppercase;flex-shrink:0;} /* left header */
+.parking-toolbar{padding:6px 8px;border-bottom:1px solid var(--border);display:flex;gap:4px;flex-shrink:0;} /* left toolbar */
+.parking-toolbar .btn{padding:3px 8px;font-size:10px;flex:1;} /* compact toolbar buttons */
+.parking-list{flex:1;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:4px;} /* parking list */
+.parking-list::-webkit-scrollbar{width:3px;} /* slim scrollbar */
+.parking-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;} /* scrollbar thumb */
+
+.p-block{border-radius:9px;padding:6px 8px;cursor:grab;border-left:3px solid transparent;transition:transform .1s,box-shadow .1s;display:flex;align-items:center;gap:5px;box-shadow:0 1px 4px rgba(0,0,0,.05);} /* parking block */
+.p-block:hover{transform:translateX(2px);box-shadow:0 3px 14px rgba(67,97,238,.15);} /* parking block hover */
+.p-block-info{flex:1;min-width:0;} /* parking info */
+.p-block-name{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} /* parking name */
+.p-block-dur{font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);} /* parking duration */
+.park-handle{cursor:ns-resize;color:var(--muted);font-size:13px;flex-shrink:0;line-height:1;} /* reorder grip */
+.p-block-reorder{display:flex;flex-direction:column;gap:1px;flex-shrink:0;} /* reorder buttons wrapper */
+.p-block-reorder button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:9px;padding:1px 2px;line-height:1;border-radius:3px;} /* reorder button */
+.p-block-reorder button:hover{background:var(--surface2);color:var(--accent);} /* reorder hover */
+.p-block-actions{display:flex;gap:2px;opacity:0;transition:opacity .12s;flex-shrink:0;} /* hidden actions */
+.p-block:hover .p-block-actions{opacity:1;} /* show actions on hover */
+.p-block-actions button{background:rgba(0,0,0,.07);border:none;color:var(--text2);width:19px;height:19px;border-radius:5px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:background .1s;} /* action button */
+.p-block-actions button:hover{background:rgba(0,0,0,.15);} /* action hover */
+
+/* TIMELINE */
+.timeline-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;} /* center panel */
+.timeline-scroll{flex:1;overflow-y:scroll;overflow-x:hidden;position:relative;} /* timeline scroller */
+.timeline-scroll::-webkit-scrollbar{width:6px;} /* scrollbar width */
+.timeline-scroll::-webkit-scrollbar-track{background:var(--bg);} /* scrollbar track */
+.timeline-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;} /* scrollbar thumb */
+.timeline-inner{position:relative;height:69120px;display:flex;}  /* timeline body */
+
+.time-ruler{width:62px;min-width:62px;position:relative;border-right:2px solid var(--border);background:var(--surface);flex-shrink:0;} /* left time ruler */
+.time-label{position:absolute;right:6px;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);transform:translateY(-50%);white-space:nowrap;pointer-events:none;} /* time labels */
+.tl-line{position:absolute;left:0;right:0;height:1px;background:var(--border);opacity:.5;pointer-events:none;} /* ruler line */
+.tl-line.hour{opacity:1;background:var(--border2);} /* hourly line */
+.tl-line.day-start{background:#7c3aed;opacity:.35;height:2px;} /* day start line */
+.drop-zone{flex:1;position:relative;} /* right timeline canvas */
+.tod-band{position:absolute;left:0;right:0;pointer-events:none;z-index:0;} /* time-of-day background band */
+.hour-line{position:absolute;left:0;right:0;height:1px;background:rgba(0,0,0,.09);pointer-events:none;z-index:1;} /* hour guide */
+.hour-line.day-break{background:rgba(124,58,237,.25);height:2px;}  /* day break guide */
+
+.now-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,#ef4444,#f97316);z-index:30;pointer-events:none;box-shadow:0 0 8px rgba(239,68,68,.35);} /* live now line */
+.now-line::before{content:'';position:absolute;left:-4px;top:-4px;width:10px;height:10px;background:#ef4444;border-radius:50%;box-shadow:0 0 6px rgba(239,68,68,.5);} /* now line dot */
+.now-pill{position:absolute;left:10px;top:-11px;background:#ef4444;color:#fff;font-family:'Space Mono',monospace;font-size:8px;padding:2px 6px;border-radius:4px;font-weight:700;white-space:nowrap;}  /* now label */
+
+.t-block{position:absolute;left:8px;right:10px;border-radius:10px;padding:5px 8px 14px 8px;font-size:11px;font-weight:600;cursor:grab;transition:box-shadow .12s;z-index:5;} /* placed block */
+.t-block.dragging{cursor:grabbing;opacity:.88;box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:100!important;} /* dragging state */
+.t-block.selected{box-shadow:0 0 0 2px var(--accent),0 4px 18px rgba(67,97,238,.18);z-index:20!important;} /* selected state */
+.t-block.overlap{outline:2px dashed #ef4444!important;} /* overlap warning */
+.t-block-header{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;} /* block header */
+.t-block-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} /* block title */
+.t-block-del{position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;background:#ef4444;border:2px solid #fff;color:#fff;font-size:10px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s,transform .15s;z-index:50;box-shadow:0 2px 6px rgba(0,0,0,.25);} /* delete bubble */
+.t-block:hover .t-block-del{opacity:1;} /* show delete bubble */
+.t-block-del:hover{transform:scale(1.2);background:#cc0000;} /* delete bubble hover */
+.t-times{display:flex;gap:5px;align-items:center;margin-top:3px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;color:rgba(0,0,0,.65);pointer-events:none;flex-wrap:nowrap;} /* time row */
+.t-times .t-start{color:rgba(0,0,0,.7);} /* start time */
+.t-times .t-arrow{color:rgba(0,0,0,.35);font-size:8px;} /* arrow */
+.t-times .t-end{color:rgba(0,0,0,.7);} /* end time */
+.t-times .t-dur{color:rgba(0,0,0,.4);font-size:8px;margin-left:2px;} /* duration */
+.t-counter{display:none;} /* hidden legacy counter */
+.t-resize{position:absolute;bottom:0;left:0;right:0;height:12px;cursor:ns-resize;display:flex;align-items:center;justify-content:center;} /* resize handle */
+.t-resize::after{content:'▬▬▬';font-size:6px;color:rgba(0,0,0,.2);letter-spacing:-2px;}  /* resize handle look */
+
+/* NOTEPAD */
+.notepad{width:210px;min-width:210px;background:var(--surface);border-left:2px solid var(--border);display:flex;flex-direction:column;overflow:hidden;} /* right note panel */
+.notepad-header{padding:8px 10px;font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1.5px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;text-transform:uppercase;flex-shrink:0;} /* note header */
+.notepad textarea{flex:1;resize:none;border:none;outline:none;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.7;color:var(--text);background:var(--surface);user-select:text;cursor:text;} /* note area */
+.notepad-footer{padding:5px 10px;font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;border-top:1px solid var(--border);letter-spacing:.5px;flex-shrink:0;} /* note footer */
+
+/* MODALS */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(26,32,64,.45);backdrop-filter:blur(5px);z-index:300;align-items:center;justify-content:center;} /* modal backdrop */
+.modal-backdrop.open{display:flex;} /* open backdrop */
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;width:360px;display:flex;flex-direction:column;gap:13px;box-shadow:0 20px 60px rgba(67,97,238,.18);max-height:90vh;overflow-y:auto;} /* modal box */
+.modal h3{font-size:15px;font-weight:700;} /* modal title */
+.field-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;} /* field label */
+.modal input[type=text],.modal input[type=number]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .12s;} /* text input */
+.modal input:focus{border-color:var(--accent);} /* input focus */
+.color-row{display:flex;gap:10px;align-items:center;} /* color row */
+.color-preview{width:46px;height:46px;border-radius:10px;border:2px solid var(--border);flex-shrink:0;} /* color swatch */
+.sliders{flex:1;display:flex;flex-direction:column;gap:4px;} /* slider stack */
+.sl-row{display:flex;align-items:center;gap:5px;} /* slider row */
+.sl-row .ch{font-size:9px;font-family:'Space Mono',monospace;font-weight:700;width:10px;flex-shrink:0;} /* R G B A label */
+.sl-row input[type=range]{flex:1;height:5px;cursor:pointer;border-radius:3px;} /* range */
+.sl-row input[type=number]{width:40px;padding:2px 4px;font-size:11px;text-align:center;border-radius:6px;} /* number box */
+#sR{accent-color:#ef4444}#sG{accent-color:#10b981}#sB{accent-color:#3b82f6}#sA{accent-color:#8b5cf6} /* colored sliders */
+.presets{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;} /* preset colors */
+.pdot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s,border-color .1s;} /* preset dot */
+.pdot:hover{transform:scale(1.18);} /* preset dot hover */
+.pdot.sel{border-color:var(--text);} /* selected preset */
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:2px;} /* modal buttons */
+.modal-close-btn{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);line-height:1;padding:2px;} /* export close button */
+.modal-close-btn:hover{color:var(--text);} /* export close hover */
+</style>
+
+<style id="abhidesk-theme">
+[data-theme="light"]{
+  --bg:#f0f2f8;--surface:#ffffff;--border:#d1d8e8;--text:#1a2040;--text2:#4a5580;
+  --muted:#6b7494;--accent:#3a5fd9;--accent2:#7c3aed;--surface2:#eef1fb;--border2:#c0c8dc;
+}
+[data-theme="light"] body{background:var(--bg);color:var(--text);}
+[data-theme="light"] .topbar,[data-theme="light"] .slider-bar,[data-theme="light"] .parking,
+[data-theme="light"] .notepad,[data-theme="light"] .modal{background:var(--surface);}
+[data-theme="light"] .parking-list::-webkit-scrollbar-thumb,[data-theme="light"] .timeline-scroll::-webkit-scrollbar-thumb{background:var(--border2);}
+[data-theme="light"] .timeline-inner{background:var(--bg);}
+[data-theme="light"] .tz-select,[data-theme="light"] .btn{background:var(--surface);border-color:var(--border);color:var(--text2);}
+[data-theme="light"] .live-clock{background:#eef1fd;border-color:#c8d4f8;}
+[data-theme="light"] .tod-band{filter:invert(1) hue-rotate(180deg) opacity(.4);}
+[data-theme="light"] .time-ruler{background:var(--surface);}
+[data-theme="light"] #notepadText{background:var(--surface);color:var(--text);}
+</style>
+
+<script>
+window.addEventListener('message',function(e){
+  if(e.data&&e.data.type==='theme'){
+    document.documentElement.setAttribute('data-theme',e.data.dark?'dark':'light');
+  }
+});
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Day<span>Flow</span></div>
+  <div class="topbar-mid">
+    <div class="live-clock" id="liveClock">--:--:--</div>
+    <div class="shift-counter" id="shiftCounter">🏢 Shift: <span id="shiftTime">00:00:00</span></div>
+    <div class="sleep-counter" id="sleepCounter">😴 Sleep: <span id="sleepTime">00:00:00</span></div>
+    <select class="tz-select" id="tzSelect"></select>
+  </div>
+  <div class="topbar-right">
+    <button class="btn" id="btnNow">⦿ Now</button>
+    <button class="btn" id="btnExport">📤 Export</button>
+    <button class="btn primary" id="btnNew">+ New Block</button>
+  </div>
+</div>
+
+<div class="slider-bar">
+  <label>📅 scroll</label>
+  <input type="range" id="tSlider" min="0" max="43200" value="0" step="15">
+  <span id="sliderDateLabel">Today 00:00</span>
+</div>
+
+<div class="main">
+  <div class="parking">
+    <div class="parking-header">
+      <span>Block Parking</span>
+      <span id="parkCount" style="color:var(--accent);font-weight:700;">0</span>
+    </div>
+    <div class="parking-toolbar">
+      <button class="btn" id="btnSaveLib" title="Save block library to file">💾 Save</button>
+      <button class="btn" id="btnLoadLib" title="Load block library from file">📂 Load</button>
+      <input type="file" id="libFileIn" accept=".json" style="display:none;">
+    </div>
+    <div class="parking-list" id="parkingList"></div>
+  </div>
+
+  <div class="timeline-wrap">
+    <div class="timeline-scroll" id="tlScroll">
+      <div class="timeline-inner">
+        <div class="time-ruler" id="ruler"></div>
+        <div class="drop-zone" id="dz"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notepad" id="notepad">
+    <div class="notepad-header">
+      <span>📋 Plan Note</span>
+      <div style="display:flex;gap:4px;">
+        <button class="btn" id="btnCopyNote" style="padding:3px 7px;font-size:10px;">Copy</button>
+        <button class="btn" id="btnClearNote" style="padding:3px 7px;font-size:10px;">Clear</button>
+      </div>
+    </div>
+    <textarea id="notepadText" placeholder="Your plan will appear here as you place blocks...&#10;&#10;Copy &amp; paste to WhatsApp!" spellcheck="false"></textarea>
+    <div class="notepad-footer">Auto-updates as you plan ✦</div>
+  </div>
+</div>
+
+<!-- BLOCK EDITOR MODAL -->
+<div class="modal-backdrop" id="mbdrop">
+  <div class="modal">
+    <h3 id="mTitle">New Block</h3>
+    <div>
+      <div class="field-label">Name</div>
+      <input type="text" id="mName" placeholder="e.g. Deep Work, Reading...">
+    </div>
+    <div>
+      <div class="field-label">Duration (minutes)</div>
+      <input type="number" id="mDur" value="30" min="5" max="480" step="5">
+    </div>
+    <div>
+      <div class="field-label">Colour &amp; Transparency</div>
+      <div class="color-row">
+        <div class="color-preview" id="cprev"></div>
+        <div class="sliders">
+          <div class="sl-row"><span class="ch" style="color:#ef4444">R</span><input type="range" id="sR" min="0" max="255" value="79"><input type="number" id="nR" min="0" max="255" value="79"></div>
+          <div class="sl-row"><span class="ch" style="color:#10b981">G</span><input type="range" id="sG" min="0" max="255" value="142"><input type="number" id="nG" min="0" max="255" value="142"></div>
+          <div class="sl-row"><span class="ch" style="color:#3b82f6">B</span><input type="range" id="sB" min="0" max="255" value="247"><input type="number" id="nB" min="0" max="255" value="247"></div>
+          <div class="sl-row"><span class="ch" style="color:#8b5cf6">A</span><input type="range" id="sA" min="0" max="100" value="28"><input type="number" id="nA" min="0" max="100" value="28"></div>
+        </div>
+      </div>
+      <div class="presets" id="presets"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="mCancel">Cancel</button>
+      <button class="btn primary" id="mSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-backdrop" id="exportDrop">
+  <div class="modal" style="width:430px;gap:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3>📤 Export Data</h3>
+      <button class="modal-close-btn" id="exportClose">✕</button>
+    </div>
+
+    <div style="display:flex;gap:7px;">
+      <div style="flex:1;background:var(--surface2);border-radius:10px;padding:9px 10px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:18px;font-weight:700;color:var(--accent);" id="exportTotalCount">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px;">Placed blocks</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:10px;padding:9px 10px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:18px;font-weight:700;color:#10b981;" id="exportRecentCount">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px;">Last 7 days</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:10px;padding:9px 10px;text-align:center;border:1px solid #fed7aa;">
+        <div style="font-size:18px;font-weight:700;color:#f59e0b;" id="exportParkCount">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px;">Parking blocks</div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);">
+
+    <!-- TIMELINE export -->
+    <div style="background:var(--surface2);border-radius:10px;padding:11px 13px;border:1px solid var(--border);">
+      <div style="font-size:12px;font-weight:700;margin-bottom:3px;">📅 Timeline — Download CSV</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px;">All placed blocks on the timeline as a .csv file.</div>
+      <button class="btn primary" id="btnDownloadCSV" style="width:100%;">⬇ Download Timeline CSV</button>
+    </div>
+
+    <!-- PARKING export -->
+    <div style="background:var(--surface2);border-radius:10px;padding:11px 13px;border:1px solid var(--border);">
+      <div style="font-size:12px;font-weight:700;margin-bottom:3px;">🅿 Parking Lot — Save Block Library</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px;">Download your block definitions as a .json file — reload them anytime so you never recreate blocks.</div>
+      <button class="btn primary" id="btnExportPark" style="width:100%;background:var(--accent2);border-color:var(--accent2);">⬇ Download Block Library (.json)</button>
+    </div>
+
+    <!-- Copy clipboard -->
+    <div style="background:var(--surface2);border-radius:10px;padding:11px 13px;border:1px solid var(--border);">
+      <div style="font-size:12px;font-weight:700;margin-bottom:3px;">📋 Copy &amp; Paste (Timeline)</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px;">Tab-separated — paste directly into Google Sheets with Ctrl+V.</div>
+      <button class="btn" id="btnCopyClip" style="width:100%;">📋 Copy Timeline to Clipboard</button>
+    </div>
+
+    <!-- Apps Script -->
+    <div style="background:var(--surface2);border-radius:10px;padding:11px 13px;border:1px solid var(--border);">
+      <div style="font-size:12px;font-weight:700;margin-bottom:3px;">🚀 Auto-send via Apps Script <span style="background:#eef1fd;color:var(--accent);font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px;">One-time setup</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Paste your Google Apps Script Web App URL — data posts directly to your Sheet.</div>
+      <input type="url" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec"
+        style="width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 9px;font-size:12px;margin-bottom:7px;outline:none;font-family:'DM Sans',sans-serif;">
+      <button class="btn primary" id="btnSendScript" style="width:100%;background:#10b981;border-color:#10b981;">🚀 Send to Google Sheet</button>
+      <details style="margin-top:9px;">
+        <summary style="font-size:10px;color:var(--accent);cursor:pointer;font-weight:600;">How to set up Apps Script (5 min)</summary>
+        <ol style="font-size:10px;color:var(--text2);margin-top:7px;padding-left:15px;line-height:1.9;">
+          <li>Open your Google Sheet → Extensions → Apps Script</li>
+          <li>Delete existing code, paste the script shown below</li>
+          <li>Click Deploy → New deployment → Web app</li>
+          <li>Set "Who has access" to <strong>Anyone</strong></li>
+          <li>Copy the Web App URL and paste it above</li>
+        </ol>
+        <pre style="background:#1e2535;color:#a3e635;font-size:9px;font-family:'Space Mono',monospace;padding:9px;border-radius:6px;margin-top:7px;white-space:pre-wrap;line-height:1.6;">function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data  = JSON.parse(e.postData.contents);
+  if (sheet.getLastRow() === 0)
+    sheet.appendRow(['Name','Start','End','Duration','Date','Placed At']);
+  data.rows.forEach(r =>
+    sheet.appendRow([r.name,r.start,r.end,r.duration,r.date,r.placedAt])
+  );
+  return ContentService.createTextOutput('OK');
+}</pre>
+      </details>
+    </div>
+
+    <!-- Archive -->
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fff8ee;border-radius:10px;border:1px solid #fed7aa;">
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;">🗃 Archive old blocks</div>
+        <div style="font-size:10px;color:#b45309;margin-top:2px;">Remove blocks older than 7 days from the timeline (export first!)</div>
+      </div>
+      <button class="btn" id="btnArchiveNow" style="border-color:#f59e0b;color:#92400e;background:#fff;">Archive</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════════
+const PPM   = 1.6; // pixels per minute
+const TOTAL = 43200;  // total minutes shown
+
+const PRESET_COLORS = [
+  [79,142,247],[167,139,250],[52,211,153],[248,113,113],
+  [251,191,36],[244,114,182],[56,189,248],[251,146,60],
+  [163,230,53],[232,121,249],[45,212,191],[250,204,21],
+  [244,63,94],[96,165,250],[192,132,252],[134,239,172]
+];  // preset palette
+
+const TOD_BANDS = [
+  {start:0,   end:420,  bg:'linear-gradient(to bottom,rgba(0,0,0,0.22),rgba(0,0,0,0.20))'},
+  {start:420, end:660,  bg:'linear-gradient(to bottom,rgba(255,200,100,0.10),rgba(255,220,140,0.07))'},
+  {start:660, end:840,  bg:'linear-gradient(to bottom,rgba(240,248,255,0.05),rgba(220,240,255,0.06))'},
+  {start:840, end:1020, bg:'linear-gradient(to bottom,rgba(255,210,120,0.07),rgba(255,180,80,0.09))'},
+  {start:1020,end:1140, bg:'linear-gradient(to bottom,rgba(255,160,60,0.10),rgba(200,100,30,0.11))'},
+  {start:1140,end:1320, bg:'linear-gradient(to bottom,rgba(30,40,80,0.13),rgba(20,30,60,0.17))'},
+  {start:1320,end:1440, bg:'linear-gradient(to bottom,rgba(0,0,0,0.18),rgba(0,0,0,0.22))'},
+]; // background bands per part of day
+
+const TOD_BASE=['#dde4f0','#fff8ee','#f4f8ff','#fff5e8','#fff0e0','#e8eaf5','#d8dcea']; // base colors for bands
+
+// SHIFT / SLEEP tracking keywords (case-insensitive match)
+const SHIFT_KEYWORDS = ['shift','work shift','night shift','day shift','morning shift']; // shift matches
+const SLEEP_KEYWORDS = ['sleep','nap','rest','bedtime']; // sleep matches
+const IMPORTANT_WORK_KEYWORDS = ['important work']; // important-work matches for countdown line
+
+// ══════════════════════════════════════════════════
+// PERSISTENCE HELPERS
+// ══════════════════════════════════════════════════
+const LS_PARK    = 'dayflow_park'; // saved parking blocks
+const LS_PLACED  = 'dayflow_placed'; // saved placed blocks
+const LS_NOTE    = 'dayflow_note'; // saved note text
+const LS_GAS_URL = 'dayflow_gasurl'; // saved apps-script URL
+
+function saveState() { // persist state into localStorage
+  try {
+    localStorage.setItem(LS_PARK, JSON.stringify(parkBlocks));
+    const placedData = placed.map(pb => ({
+      id: pb.id, blockId: pb.blockId, startMin: pb.startMin,
+      duration: pb.duration, color: pb.color, name: pb.name, placedAt: pb.placedAt
+    }));
+    localStorage.setItem(LS_PLACED, JSON.stringify(placedData));
+  } catch(e) { console.warn('Save failed:', e); }
+}
+
+function loadParkBlocks() { // restore parked blocks
+  try {
+    const raw = localStorage.getItem(LS_PARK);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function loadPlacedData() { // restore placed blocks
+  try {
+    const raw = localStorage.getItem(LS_PLACED);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let parkBlocks = []; // left-side blocks
+let placed     = []; // timeline blocks
+let selId      = null; // selected placed block id
+let editId     = null; // editing parked block id
+let SC         = {r:79,g:142,b:247,a:28};  // modal color state
+
+// Shift / sleep counters
+let shiftStartMs  = null; // active shift start
+let sleepStartMs  = null; // active sleep start
+let counterIv     = null;  // interval handle
+
+// ══════════════════════════════════════════════════
+// TIMEZONE
+// ══════════════════════════════════════════════════
+const TZS = [
+  'Europe/London','Europe/Paris','Europe/Berlin','Europe/Madrid','Europe/Rome',
+  'UTC',
+  'America/New_York','America/Chicago','America/Denver','America/Los_Angeles',
+  'America/Toronto','America/Sao_Paulo',
+  'Asia/Kolkata','Asia/Dubai','Asia/Singapore','Asia/Tokyo','Asia/Shanghai',
+  'Australia/Sydney','Pacific/Auckland','Africa/Johannesburg'
+]; // supported timezones
+
+const tzEl = document.getElementById('tzSelect'); // timezone select element
+const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone; // browser timezone
+const allTzs = TZS.includes(browserTz) ? TZS : [browserTz,...TZS]; // include browser timezone if missing
+
+allTzs.forEach(tz => {
+  const o = document.createElement('option');
+  o.value = tz; o.textContent = tz.replace(/_/g,' ');
+  if (tz === browserTz) o.selected = true;
+  tzEl.appendChild(o);
+}); // populate timezone list
+
+const getTz = () => tzEl.value; // current timezone getter
+
+// ══════════════════════════════════════════════════
+// TIME HELPERS
+// ══════════════════════════════════════════════════
+function getTodayMidnightMs(tz) { // get today's midnight in chosen timezone
+  const now = new Date();
+  const ds  = new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  const dummy = new Date(ds+'T00:00:00');
+  const tzStr  = new Intl.DateTimeFormat('en-US',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(dummy);
+  const utcStr = new Intl.DateTimeFormat('en-US',{timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(dummy);
+  const diff = new Date(tzStr.replace(/(\d+)\/(\d+)\/(\d+)/,'$3-$1-$2')).getTime()
+             - new Date(utcStr.replace(/(\d+)\/(\d+)\/(\d+)/,'$3-$1-$2')).getTime();
+  return dummy.getTime() - diff;
+}
+
+function getNowMinutes() { // minutes since today midnight in selected timezone
+  return Math.floor((Date.now() - getTodayMidnightMs(getTz())) / 60000);
+}
+
+function minToMs(m) { return getTodayMidnightMs(getTz()) + m*60000; } // minutes to absolute ms
+function fmt(m,opts) { return new Intl.DateTimeFormat('en-GB',{timeZone:getTz(),...opts}).format(new Date(minToMs(m))); } // format helper
+function fmtHHMM(m)  { return fmt(m,{hour:'2-digit',minute:'2-digit',hour12:false}); } // HH:MM
+function fmtDay(m)   { return fmt(m,{weekday:'short',day:'numeric',month:'short'}); } // day label
+function fmtFull(m)  { return fmtDay(m)+' '+fmtHHMM(m); } // full label
+const m2y   = m => m*PPM; // minutes to pixels
+const y2m   = y => Math.round(y/PPM); // pixels to minutes
+const snap5 = m => Math.round(m/5)*5;  // round to 5 mins
+
+function secsToHMS(s) { // seconds to 00:00:00
+  const h = String(Math.floor(s/3600)).padStart(2,'0');
+  const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const sc= String(s%60).padStart(2,'0');
+  return `${h}:${m}:${sc}`;
+}
+
+// ══════════════════════════════════════════════════
+// SHIFT / SLEEP COUNTER LOGIC
+// ══════════════════════════════════════════════════
+function isShiftBlock(name) { // detect shift blocks
+  return SHIFT_KEYWORDS.some(k => name.toLowerCase().includes(k));
+}
+
+function isSleepBlock(name) { // detect sleep blocks
+  return SLEEP_KEYWORDS.some(k => name.toLowerCase().includes(k));
+}
+
+function isCountdownBlock(name) { // detect blocks that should show future countdown guide
+  const lower = name.toLowerCase();
+  return isShiftBlock(name) || IMPORTANT_WORK_KEYWORDS.some(k => lower.includes(k));
+}
+
+function fmtRemain(mins) { // format remaining minutes as 00h 00m
+  const total = Math.max(0, Math.round(mins));
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+}
+
+function updateCountdownGuides() { // draw vertical line from now to future shift / important work blocks
+  const dz = document.getElementById('dz');
+  dz.querySelectorAll('.countdown-guide,.countdown-label,.countdown-cap').forEach(el => el.remove());
+
+  const nowMin = getNowMinutes();
+
+  placed.forEach(pb => {
+    if (!isCountdownBlock(pb.name)) return;
+    if (pb.startMin <= nowMin) return;
+    if (!pb.el || !pb.el.parentNode) return;
+
+    const line = document.createElement('div');
+    line.className = 'countdown-guide';
+    line.style.position = 'absolute';
+    line.style.top = m2y(nowMin) + 'px';
+    line.style.height = m2y(pb.startMin - nowMin) + 'px';
+    line.style.right = '6px';
+    line.style.width = '2px';
+    line.style.background = 'linear-gradient(to bottom, rgba(239,68,68,.95), rgba(67,97,238,.9))';
+    line.style.borderRadius = '2px';
+    line.style.zIndex = '24';
+    line.style.pointerEvents = 'none';
+    line.style.boxShadow = '0 0 8px rgba(67,97,238,.22)';
+    dz.appendChild(line);
+
+    const cap = document.createElement('div');
+    cap.className = 'countdown-cap';
+    cap.style.position = 'absolute';
+    cap.style.top = (m2y(pb.startMin) - 4) + 'px';
+    cap.style.right = '2px';
+    cap.style.width = '10px';
+    cap.style.height = '10px';
+    cap.style.borderRadius = '50%';
+    cap.style.background = toRgba(pb.color, false);
+    cap.style.border = '2px solid #fff';
+    cap.style.zIndex = '25';
+    cap.style.pointerEvents = 'none';
+    dz.appendChild(cap);
+
+    const label = document.createElement('div');
+    label.className = 'countdown-label';
+    label.textContent = fmtRemain(pb.startMin - nowMin);
+    label.style.position = 'absolute';
+    label.style.top = (m2y(nowMin + (pb.startMin - nowMin)/2) - 11) + 'px';
+    label.style.right = '14px';
+    label.style.background = 'rgba(26,32,64,.92)';
+    label.style.color = '#fff';
+    label.style.fontFamily = "'Space Mono', monospace";
+    label.style.fontSize = '9px';
+    label.style.fontWeight = '700';
+    label.style.padding = '3px 6px';
+    label.style.borderRadius = '6px';
+    label.style.whiteSpace = 'nowrap';
+    label.style.zIndex = '26';
+    label.style.pointerEvents = 'none';
+    label.style.boxShadow = '0 2px 10px rgba(0,0,0,.18)';
+    dz.appendChild(label);
+  });
+}
+
+function startCountersIfNeeded() { // activate shift / sleep counters if current time falls inside a matching block
+  const nowMs = Date.now();
+  const midMs = getTodayMidnightMs(getTz());
+
+  let newShift = null, newSleep = null;
+
+  placed.forEach(pb => {
+    const startMs = midMs + pb.startMin * 60000;
+    const endMs   = startMs + pb.duration * 60000;
+    if (isShiftBlock(pb.name) && nowMs >= startMs && nowMs <= endMs) {
+      if (!newShift || startMs > (midMs + newShift.startMin * 60000)) newShift = pb;
+    }
+    if (isSleepBlock(pb.name) && nowMs >= startMs && nowMs <= endMs) {
+      if (!newSleep || startMs > (midMs + newSleep.startMin * 60000)) newSleep = pb;
+    }
+  });
+
+  const shiftEl = document.getElementById('shiftCounter');
+  const sleepEl = document.getElementById('sleepCounter');
+
+  if (newShift) {
+    const startMs2 = midMs + newShift.startMin * 60000;
+    if (shiftStartMs === null) shiftStartMs = startMs2;
+    shiftEl.classList.add('active');
+  } else {
+    shiftEl.classList.remove('active');
+    shiftStartMs = null;
+  }
+
+  if (newSleep) {
+    const startMs2 = midMs + newSleep.startMin * 60000;
+    if (sleepStartMs === null) sleepStartMs = startMs2;
+    sleepEl.classList.add('active');
+  } else {
+    sleepEl.classList.remove('active');
+    sleepStartMs = null;
+  }
+}
+
+function tickCounters() { // update live counters and block displayed times
+  const nowMs = Date.now();
+  if (shiftStartMs !== null) {
+    const elapsed = Math.max(0, Math.floor((nowMs - shiftStartMs)/1000));
+    document.getElementById('shiftTime').textContent = secsToHMS(elapsed);
+  }
+  if (sleepStartMs !== null) {
+    const elapsed = Math.max(0, Math.floor((nowMs - sleepStartMs)/1000));
+    document.getElementById('sleepTime').textContent = secsToHMS(elapsed);
+  }
+  placed.forEach(pb => {
+    const ts = pb.el.querySelector('.t-start');
+    const te = pb.el.querySelector('.t-end');
+    const td = pb.el.querySelector('.t-dur');
+    if(ts) ts.textContent = fmtHHMM(pb.startMin);
+    if(te) te.textContent = fmtHHMM(pb.startMin+pb.duration);
+    if(td) td.textContent = `(${pb.duration}m)`;
+  });
+}
+
+function startCounterInterval() { // start 1-second refresh loop
+  if (counterIv) clearInterval(counterIv);
+  counterIv = setInterval(() => {
+    startCountersIfNeeded();
+    tickCounters();
+  }, 1000);
+}
+
+// ══════════════════════════════════════════════════
+// LIVE CLOCK
+// ══════════════════════════════════════════════════
+function tickClock() { // update top live clock
+  const s = new Intl.DateTimeFormat('en-GB',{timeZone:getTz(),hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
+  document.getElementById('liveClock').textContent = s+' · '+getTz().split('/').pop().replace(/_/g,' ');
+}
+tickClock();
+setInterval(tickClock, 1000);
+tzEl.addEventListener('change', () => { tickClock(); rebuildRuler(); buildDropZone(); updateNow(); updateSliderLabel(); updateCountdownGuides(); });
+
+// ══════════════════════════════════════════════════
+// BUILD DROP ZONE
+// ══════════════════════════════════════════════════
+function buildDropZone() { // build timeline background bands and hour lines
+  const dz = document.getElementById('dz');
+  dz.querySelectorAll('.tod-band,.hour-line').forEach(el => el.remove());
+  const DAYS = 30;
+  for (let day=0; day<DAYS; day++) {
+    const dayOffMin = day*1440;
+    TOD_BANDS.forEach((band,bi) => {
+      const bandEl = document.createElement('div');
+      bandEl.className = 'tod-band';
+      bandEl.style.top    = m2y(dayOffMin+band.start)+'px';
+      bandEl.style.height = m2y(band.end-band.start)+'px';
+      bandEl.style.backgroundColor = TOD_BASE[bi];
+      bandEl.style.backgroundImage = band.bg;
+      dz.appendChild(bandEl);
+    });
+    for (let h=0; h<24; h++) {
+      const hl = document.createElement('div');
+      hl.className = 'hour-line'+(h===0?' day-break':'');
+      hl.style.top = m2y(dayOffMin+h*60)+'px';
+      dz.appendChild(hl);
+    }
+  }
+  const last = document.createElement('div');
+  last.className = 'hour-line day-break';
+  last.style.top = m2y(DAYS*1440)+'px';
+  dz.appendChild(last);
+}
+
+// ══════════════════════════════════════════════════
+// BUILD RULER
+// ══════════════════════════════════════════════════
+function rebuildRuler() { // rebuild left-side time ruler
+  const ruler = document.getElementById('ruler');
+  ruler.innerHTML = '';
+  for (let m=0; m<=TOTAL; m+=15) {
+    const y = m2y(m);
+    if (m%1440===0) {
+      const dl = document.createElement('div');
+      dl.className='tl-line day-start'; dl.style.top=y+'px'; ruler.appendChild(dl);
+      const lb = document.createElement('div');
+      lb.className='time-label'; lb.style.top=y+'px';
+      lb.style.color='#7c3aed'; lb.style.fontWeight='700'; lb.style.fontSize='8px';
+      lb.textContent = m===0?'TODAY':fmtDay(m); ruler.appendChild(lb);
+    }
+    const line = document.createElement('div');
+    line.className='tl-line'+(m%60===0?' hour':'');
+    line.style.top=y+'px'; ruler.appendChild(line);
+    if (m%60===0 && m%1440!==0) {
+      const lb = document.createElement('div');
+      lb.className='time-label'; lb.style.top=y+'px'; lb.textContent=fmtHHMM(m); ruler.appendChild(lb);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════
+// NOW LINE
+// ══════════════════════════════════════════════════
+let nowEl=null, nowPill=null; // live line elements
+
+function ensureNow() { // create now-line elements once
+  if (nowEl) return;
+  nowEl  = document.createElement('div'); nowEl.className='now-line';
+  nowPill= document.createElement('div'); nowPill.className='now-pill';
+  nowEl.appendChild(nowPill);
+  document.getElementById('dz').appendChild(nowEl);
+}
+
+function updateNow() { // update red now-line and future countdown guides
+  ensureNow();
+  const n = getNowMinutes();
+  nowEl.style.top = m2y(n)+'px';
+  nowPill.textContent = '● NOW '+fmtHHMM(n);
+  updateCountdownGuides();
+}
+
+// ══════════════════════════════════════════════════
+// SLIDER / SCROLL
+// ══════════════════════════════════════════════════
+const tlScroll = document.getElementById('tlScroll'); // timeline scroll element
+const tSlider  = document.getElementById('tSlider');  // slider element
+
+function updateSliderLabel() { // update date label near slider
+  document.getElementById('sliderDateLabel').textContent = fmtFull(parseInt(tSlider.value));
+}
+
+tSlider.addEventListener('input', () => {
+  tlScroll.scrollTop = m2y(parseInt(tSlider.value));
+  updateSliderLabel();
+}); // slider moves timeline
+
+tlScroll.addEventListener('scroll', () => {
+  tSlider.value = Math.min(TOTAL, y2m(tlScroll.scrollTop));
+  updateSliderLabel();
+}); // scroll moves slider
+
+document.getElementById('btnNow').onclick = () => {
+  const m = Math.max(0, getNowMinutes()-30);
+  tlScroll.scrollTop = m2y(m); tSlider.value = m; updateSliderLabel();
+}; // jump close to now
+
+// ══════════════════════════════════════════════════
+// COLOUR HELPERS
+// ══════════════════════════════════════════════════
+function toRgba(c, fill=true) { // convert color object into CSS rgb/rgba
+  return fill ? `rgba(${c.r},${c.g},${c.b},${c.a/100})` : `rgb(${c.r},${c.g},${c.b})`;
+}
+
+function syncColorUI() { // sync modal slider + preview UI
+  ['r','g','b','a'].forEach(ch => {
+    document.getElementById('s'+ch.toUpperCase()).value = SC[ch];
+    document.getElementById('n'+ch.toUpperCase()).value = SC[ch];
+  });
+  document.getElementById('cprev').style.background  = toRgba(SC);
+  document.getElementById('cprev').style.borderColor = toRgba(SC,false);
+}
+
+function buildPresets() { // build preset color dots
+  const w = document.getElementById('presets'); w.innerHTML='';
+  PRESET_COLORS.forEach(([r,g,b]) => {
+    const d = document.createElement('div'); d.className='pdot';
+    d.style.background = `rgba(${r},${g},${b},0.85)`;
+    d.onclick = () => { SC={r,g,b,a:SC.a}; syncColorUI(); };
+    w.appendChild(d);
+  });
+}
+buildPresets();
+syncColorUI();
+
+['R','G','B','A'].forEach(CH => {
+  const sl=document.getElementById('s'+CH), nm=document.getElementById('n'+CH);
+  const key=CH.toLowerCase();
+  sl.addEventListener('input',()=>{ SC[key]=parseInt(sl.value); nm.value=sl.value; syncColorUI(); });
+  nm.addEventListener('input',()=>{
+    const mx=CH==='A'?100:255;
+    const v=Math.max(0,Math.min(parseInt(nm.value)||0,mx));
+    SC[key]=v; sl.value=v; syncColorUI();
+  });
+}); // modal color input syncing
+
+// ══════════════════════════════════════════════════
+// MODAL (block editor)
+// ══════════════════════════════════════════════════
+function openModal(eid=null) { // open create/edit block modal
+  editId=eid;
+  document.getElementById('mTitle').textContent = eid?'Edit Block':'New Block';
+  if (eid) {
+    const b=parkBlocks.find(b=>b.id===eid);
+    document.getElementById('mName').value=b.name;
+    document.getElementById('mDur').value=b.duration;
+    SC={...b.color};
+  } else {
+    document.getElementById('mName').value='';
+    document.getElementById('mDur').value=30;
+    const p=PRESET_COLORS[Math.floor(Math.random()*PRESET_COLORS.length)];
+    SC={r:p[0],g:p[1],b:p[2],a:28};
+  }
+  syncColorUI(); buildPresets();
+  document.getElementById('mbdrop').classList.add('open');
+  setTimeout(()=>document.getElementById('mName').focus(),60);
+}
+document.getElementById('btnNew').onclick = () => openModal(); // open new modal
+document.getElementById('mCancel').onclick = () => document.getElementById('mbdrop').classList.remove('open'); // cancel modal
+document.getElementById('mbdrop').addEventListener('click', e => {
+  if (e.target===document.getElementById('mbdrop')) document.getElementById('mbdrop').classList.remove('open');
+}); // close on backdrop click
+
+document.getElementById('mSave').onclick = () => {
+  const name=document.getElementById('mName').value.trim();
+  const dur=parseInt(document.getElementById('mDur').value);
+  if (!name||!dur) return;
+  if (editId) {
+    const b=parkBlocks.find(b=>b.id===editId);
+    b.name=name; b.duration=dur; b.color={...SC};
+    placed.filter(p=>p.blockId===editId).forEach(p=>{p.name=name;p.color={...SC};refreshEl(p);});
+    renderParking();
+  } else {
+    parkBlocks.push({id:'b'+Date.now()+Math.random(),name,duration:dur,color:{...SC}});
+    renderParking();
+  }
+  document.getElementById('mbdrop').classList.remove('open');
+}; // save modal
+
+// ══════════════════════════════════════════════════
+// PARKING — RENDER + REORDER
+// ══════════════════════════════════════════════════
+function moveBlock(idx, dir) { // move parked block up/down
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= parkBlocks.length) return;
+  [parkBlocks[idx], parkBlocks[newIdx]] = [parkBlocks[newIdx], parkBlocks[idx]];
+  renderParking();
+}
+
+function renderParking() { // render left parking list
+  const list = document.getElementById('parkingList'); list.innerHTML='';
+  parkBlocks.forEach((b, idx) => {
+    const el = document.createElement('div');
+    el.className='p-block'; el.dataset.bid=b.id; el.dataset.idx=idx;
+    el.style.background = toRgba(b.color);
+    el.style.borderLeftColor = toRgba(b.color,false);
+
+    el.innerHTML=`
+      <span class="park-handle" title="Drag to reorder">⠿</span>
+      <div class="p-block-info">
+        <div class="p-block-name">${b.name}</div>
+        <div class="p-block-dur">${b.duration} min</div>
+      </div>
+      <div class="p-block-reorder">
+        <button title="Move up" onclick="moveBlock(${idx},-1)">▲</button>
+        <button title="Move down" onclick="moveBlock(${idx},1)">▼</button>
+      </div>
+      <div class="p-block-actions">
+        <button onclick="openModal('${b.id}')" title="Edit">✏</button>
+        <button onclick="delBlock('${b.id}')" title="Delete">✕</button>
+      </div>`;
+
+    // Drag-to-place on timeline
+    el.addEventListener('mousedown', ev => {
+      if (ev.target.classList.contains('park-handle')) return;
+      if (ev.target.tagName==='BUTTON') return;
+      onParkDown(ev, b);
+    });
+
+    // Drag handle — reorder
+    el.querySelector('.park-handle').addEventListener('mousedown', ev => {
+      ev.preventDefault(); ev.stopPropagation();
+      let currentIdx = idx;
+      const itemH = el.offsetHeight + 4;
+      const startY = ev.clientY;
+      el.style.opacity='0.55'; el.style.boxShadow='0 4px 16px rgba(67,97,238,.3)';
+
+      const mv = e2 => {
+        const delta = Math.round((e2.clientY - startY) / itemH);
+        const targetIdx = Math.max(0, Math.min(parkBlocks.length-1, idx+delta));
+        if (targetIdx !== currentIdx) {
+          const arr = [...parkBlocks];
+          const [moved] = arr.splice(idx, 1);
+          arr.splice(targetIdx, 0, moved);
+          parkBlocks = arr;
+          currentIdx = targetIdx;
+          renderParking();
+        }
+      };
+      const up = () => {
+        document.removeEventListener('mousemove', mv);
+        document.removeEventListener('mouseup', up);
+        renderParking();
+      };
+      document.addEventListener('mousemove', mv);
+      document.addEventListener('mouseup', up);
+    });
+
+    list.appendChild(el);
+  });
+  document.getElementById('parkCount').textContent = parkBlocks.length;
+}
+
+function delBlock(id) { // delete parked block and any placed copies
+  parkBlocks = parkBlocks.filter(b=>b.id!==id);
+  placed.filter(p=>p.blockId===id).forEach(p=>p.el.remove());
+  placed = placed.filter(p=>p.blockId!==id);
+  renderParking();
+  updateCountdownGuides();
+}
+
+// ══════════════════════════════════════════════════
+// SAVE / LOAD BLOCK LIBRARY
+// ══════════════════════════════════════════════════
+document.getElementById('btnSaveLib').onclick = () => {
+  const data = JSON.stringify(parkBlocks, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'DayFlow_blocks_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(url);
+}; // download parked blocks
+
+document.getElementById('btnLoadLib').onclick = () => document.getElementById('libFileIn').click(); // open file picker
+
+document.getElementById('libFileIn').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const blocks = JSON.parse(ev.target.result);
+      if (!Array.isArray(blocks)) throw new Error('Invalid format');
+      const existing = new Set(parkBlocks.map(b=>b.name.toLowerCase()));
+      let added=0;
+      blocks.forEach(b => {
+        if (!b.name || !b.duration || !b.color) return;
+        if (!existing.has(b.name.toLowerCase())) {
+          parkBlocks.push({...b, id:'b'+Date.now()+Math.random()});
+          existing.add(b.name.toLowerCase());
+          added++;
+        }
+      });
+      renderParking();
+      alert(`✅ Loaded ${added} new block(s). (${blocks.length-added} skipped as duplicates.)`);
+    } catch(err) {
+      alert('❌ Failed to load file: '+err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}); // import parked block library
+
+// ══════════════════════════════════════════════════
+// DRAG FROM PARKING → TIMELINE
+// ══════════════════════════════════════════════════
+function onParkDown(e, b) { // drag parked block into timeline
+  if (e.button!==0) return;
+  e.preventDefault(); e.stopPropagation();
+
+  const ghost = document.createElement('div');
+  ghost.className = 't-block';
+  const gh = Math.max(26, b.duration*PPM);
+  ghost.style.cssText=`position:fixed;width:170px;height:${gh}px;background:${toRgba(b.color)};border-left:4px solid ${toRgba(b.color,false)};pointer-events:none;z-index:9999;opacity:0.85;left:${e.clientX-85}px;top:${e.clientY-12}px;border-radius:10px;padding:5px 8px;font-size:11px;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.18);`;
+  ghost.textContent = b.name;
+  document.body.appendChild(ghost);
+
+  const snapLine = document.createElement('div');
+  snapLine.style.cssText='position:absolute;left:0;right:0;height:2px;background:var(--accent);opacity:.6;z-index:50;pointer-events:none;display:none;';
+  document.getElementById('dz').appendChild(snapLine);
+
+  function onMove(ev) {
+    ghost.style.left=(ev.clientX-85)+'px';
+    ghost.style.top=(ev.clientY-12)+'px';
+    const scRect = tlScroll.getBoundingClientRect();
+    if (ev.clientX>=scRect.left&&ev.clientX<=scRect.right&&ev.clientY>=scRect.top&&ev.clientY<=scRect.bottom) {
+      const y=(ev.clientY-scRect.top)+tlScroll.scrollTop;
+      snapLine.style.top=m2y(snap5(y2m(y)))+'px';
+      snapLine.style.display='block';
+    } else snapLine.style.display='none';
+  }
+
+  function onUp(ev) {
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('mouseup',onUp);
+    ghost.remove(); snapLine.remove();
+    const scRect = tlScroll.getBoundingClientRect();
+    if (ev.clientX>=scRect.left&&ev.clientX<=scRect.right&&ev.clientY>=scRect.top&&ev.clientY<=scRect.bottom) {
+      const y=(ev.clientY-scRect.top)+tlScroll.scrollTop;
+      const startMin=snap5(Math.max(0,y2m(y)));
+      placeBlock(b.id, b.name, b.color, startMin, b.duration);
+    }
+  }
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+}
+
+// ══════════════════════════════════════════════════
+// SELECT
+// ══════════════════════════════════════════════════
+function selectBlock(id) { // select one placed block
+  if (selId) { const o=placed.find(p=>p.id===selId); if(o) o.el.classList.remove('selected'); }
+  selId = id;
+  if (id) { const p=placed.find(p=>p.id===id); if(p) p.el.classList.add('selected'); }
+}
+
+// ══════════════════════════════════════════════════
+// PLACE BLOCK ON TIMELINE
+// ══════════════════════════════════════════════════
+function placeBlock(blockId, name, color, startMin, duration, existingId, existingPlacedAt) { // create timeline block
+  const id = existingId || ('p'+Date.now()+Math.random());
+  const el = document.createElement('div');
+  el.className='t-block';
+  el.style.top    = m2y(startMin)+'px';
+  el.style.height = Math.max(26,duration*PPM)+'px';
+  el.style.background      = toRgba(color);
+  el.style.borderLeftColor = toRgba(color,false);
+  el.style.zIndex = 5;
+
+  el.innerHTML=`
+    <button class="t-block-del" onclick="removePl('${id}')">✕</button>
+    <div class="t-block-header">
+      <span class="t-block-name">${name}</span>
+    </div>
+    <div class="t-times">
+      <span class="t-start">${fmtHHMM(startMin)}</span>
+      <span class="t-arrow">→</span>
+      <span class="t-end">${fmtHHMM(startMin+duration)}</span>
+      <span class="t-dur">(${duration}m)</span>
+    </div>
+    <div class="t-counter"></div>
+    <div class="t-resize"></div>`;
+
+  const pb = {id, blockId, startMin, duration, color:{...color}, name, el, placedAt: existingPlacedAt || Date.now()};
+  placed.push(pb);
+  document.getElementById('dz').appendChild(el);
+
+  // Click-select
+  el.addEventListener('mousedown', ev => {
+    if (ev.target.classList.contains('t-resize')||ev.target.classList.contains('t-block-del')) return;
+    selectBlock(id);
+  });
+
+  // Drag move
+  el.addEventListener('mousedown', ev => {
+    if (ev.target.classList.contains('t-resize')||ev.target.classList.contains('t-block-del')) return;
+    if (ev.button!==0) return;
+    ev.preventDefault(); ev.stopPropagation();
+    const startY0=ev.clientY, startScroll=tlScroll.scrollTop, startMin0=pb.startMin;
+    el.classList.add('dragging');
+    const mv=e2=>{
+      const dy=e2.clientY-startY0, ds=tlScroll.scrollTop-startScroll;
+      let newMin=snap5(Math.max(0,startMin0+y2m(dy+ds)));
+      const SNAP=10;
+      placed.forEach(other=>{
+        if(other.id===id) return;
+        if(Math.abs(newMin-(other.startMin+other.duration))<=SNAP) newMin=other.startMin+other.duration;
+        if(Math.abs((newMin+pb.duration)-other.startMin)<=SNAP) newMin=other.startMin-pb.duration;
+      });
+      pb.startMin=Math.max(0,newMin);
+      el.style.top=m2y(pb.startMin)+'px';
+      checkOverlaps(); updateNotepad(); updateCountdownGuides();
+    };
+    const up=()=>{
+      document.removeEventListener('mousemove',mv);
+      document.removeEventListener('mouseup',up);
+      el.classList.remove('dragging');
+      checkOverlaps(); updateNotepad(); updateCountdownGuides();
+      startCountersIfNeeded();
+    };
+    document.addEventListener('mousemove',mv);
+    document.addEventListener('mouseup',up);
+  });
+
+  // Resize
+  const rh=el.querySelector('.t-resize');
+  rh.addEventListener('mousedown',ev=>{
+    ev.preventDefault(); ev.stopPropagation();
+    const sy=ev.clientY, sd=pb.duration;
+    const mv=e2=>{
+      const dm=Math.round((e2.clientY-sy)/PPM/5)*5;
+      pb.duration=Math.max(5,sd+dm);
+      el.style.height=Math.max(26,pb.duration*PPM)+'px';
+      checkOverlaps(); updateNotepad(); updateCountdownGuides();
+    };
+    const up=()=>{
+      document.removeEventListener('mousemove',mv);
+      document.removeEventListener('mouseup',up);
+      startCountersIfNeeded();
+      updateCountdownGuides();
+    };
+    document.addEventListener('mousemove',mv);
+    document.addEventListener('mouseup',up);
+  });
+
+  selectBlock(id); checkOverlaps(); updateNotepad();
+  startCountersIfNeeded();
+  updateCountdownGuides();
+}
+
+function removePl(id) { // remove one placed block
+  const p=placed.find(p=>p.id===id);
+  if(p){ p.el.remove(); placed=placed.filter(q=>q.id!==id); }
+  if(selId===id) selId=null;
+  checkOverlaps(); updateNotepad();
+  updateCountdownGuides();
+  startCountersIfNeeded();
+}
+
+function refreshEl(pb) { // refresh placed block appearance after park-edit
+  pb.el.style.background      = toRgba(pb.color);
+  pb.el.style.borderLeftColor = toRgba(pb.color,false);
+  const n=pb.el.querySelector('.t-block-name'); if(n) n.textContent=pb.name;
+  updateCountdownGuides();
+}
+
+function checkOverlaps() { // mark overlapping blocks
+  placed.forEach(a=>{
+    let ov=false;
+    placed.forEach(b=>{
+      if(a.id===b.id) return;
+      if(a.startMin<b.startMin+b.duration&&a.startMin+a.duration>b.startMin) ov=true;
+    });
+    a.el.classList.toggle('overlap',ov);
+  });
+}
+
+document.getElementById('dz').addEventListener('mousedown',e=>{
+  if(e.target===document.getElementById('dz')) selectBlock(null);
+}); // click empty timeline to deselect
+
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openModal();}
+  if(e.key==='Escape') selectBlock(null);
+}); // shortcuts
+
+// ══════════════════════════════════════════════════
+// DEFAULT BLOCKS (only used if nothing saved)
+// ══════════════════════════════════════════════════
+const DEFAULT_BLOCKS = [
+  {name:'Deep Work',   duration:90,  color:{r:79, g:142,b:247,a:40}},
+  {name:'Morning Gym', duration:60,  color:{r:52, g:211,b:153,a:40}},
+  {name:'Reading',     duration:30,  color:{r:167,g:139,b:250,a:40}},
+  {name:'Lunch Break', duration:60,  color:{r:251,g:191,b:36, a:45}},
+  {name:'Learning',    duration:45,  color:{r:56, g:189,b:248,a:40}},
+  {name:'Admin/Email', duration:30,  color:{r:244,g:114,b:182,a:40}},
+  {name:'Planning',    duration:15,  color:{r:251,g:146,b:60, a:45}},
+  {name:'Walk/Break',  duration:20,  color:{r:45, g:212,b:191,a:40}},
+  {name:'Shift',       duration:480, color:{r:255,g:193,b:7,  a:38}},
+  {name:'Sleep',       duration:480, color:{r:100,g:130,b:255,a:35}},
+]; // starter block library
+
+const savedPark = loadParkBlocks();
+if (savedPark && savedPark.length > 0) {
+  parkBlocks = savedPark;
+} else {
+  DEFAULT_BLOCKS.forEach(d => parkBlocks.push({id:'b'+Date.now()+Math.random(),...d}));
+} // load defaults only if nothing saved
+
+// ══════════════════════════════════════════════════
+// NOTEPAD
+// ══════════════════════════════════════════════════
+function updateNotepad() { // build shareable plan text
+  const sorted = [...placed].sort((a,b)=>a.startMin-b.startMin);
+  if (!sorted.length) { document.getElementById('notepadText').value=''; return; }
+  let text='📅 *My Plan*\n', lastDay=null;
+  sorted.forEach(pb=>{
+    const day=fmtDay(pb.startMin);
+    if(day!==lastDay){ text+=`\n*${day}*\n`; lastDay=day; }
+    text+=`• ${fmtHHMM(pb.startMin)}–${fmtHHMM(pb.startMin+pb.duration)} ${pb.name} (${pb.duration}m)\n`;
+  });
+  document.getElementById('notepadText').value=text.trim();
+}
+
+document.getElementById('btnCopyNote').onclick = () => {
+  const txt=document.getElementById('notepadText').value;
+  if(!txt) return;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.getElementById('btnCopyNote');
+    btn.textContent='✅'; setTimeout(()=>btn.textContent='Copy',1800);
+  });
+}; // copy note
+
+document.getElementById('btnClearNote').onclick = () => {
+  document.getElementById('notepadText').value='';
+}; // clear note
+
+// ══════════════════════════════════════════════════
+// EXPORT MODAL
+// ══════════════════════════════════════════════════
+function toCSV(blocks) { // turn placed blocks into CSV text
+  const hdr=['Block Name','Start Time','End Time','Duration (min)','Date','Placed At'];
+  const rows=blocks.map(pb=>{
+    const pa=pb.placedAt?new Date(pb.placedAt).toLocaleString():'N/A';
+    return [pb.name,fmtHHMM(pb.startMin),fmtHHMM(pb.startMin+pb.duration),pb.duration,fmtDay(pb.startMin),pa]
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+  return[hdr.join(','),...rows].join('\n');
+}
+
+function refreshExportModal() { // refresh export stats
+  const sevenAgo=Date.now()-7*24*60*60*1000;
+  const recent=placed.filter(pb=>!pb.placedAt||pb.placedAt>=sevenAgo);
+  document.getElementById('exportTotalCount').textContent=placed.length;
+  document.getElementById('exportRecentCount').textContent=recent.length;
+  document.getElementById('exportParkCount').textContent=parkBlocks.length;
+}
+
+document.getElementById('btnExport').onclick = () => {
+  refreshExportModal();
+  document.getElementById('exportDrop').classList.add('open');
+}; // open export modal
+
+document.getElementById('exportClose').onclick = () => document.getElementById('exportDrop').classList.remove('open'); // close export
+document.getElementById('exportDrop').addEventListener('click',e=>{
+  if(e.target===document.getElementById('exportDrop')) document.getElementById('exportDrop').classList.remove('open');
+}); // close on backdrop click
+
+// Download timeline CSV
+document.getElementById('btnDownloadCSV').onclick = () => {
+  const blocks=[...placed].sort((a,b)=>a.startMin-b.startMin);
+  if(!blocks.length){alert('No placed blocks to export yet.');return;}
+  const csv=toCSV(blocks);
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='DayFlow_timeline_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+};
+
+// Download parking lot JSON
+document.getElementById('btnExportPark').onclick = () => {
+  if(!parkBlocks.length){alert('No blocks in parking lot.');return;}
+  const data=JSON.stringify(parkBlocks,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='DayFlow_blocks_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(url);
+};
+
+// Copy timeline to clipboard
+document.getElementById('btnCopyClip').onclick = () => {
+  const blocks=[...placed].sort((a,b)=>a.startMin-b.startMin);
+  if(!blocks.length){alert('No placed blocks to export yet.');return;}
+  const hdr=['Block Name','Start Time','End Time','Duration (min)','Date'].join('\t');
+  const rows=blocks.map(pb=>[pb.name,fmtHHMM(pb.startMin),fmtHHMM(pb.startMin+pb.duration),pb.duration,fmtDay(pb.startMin)].join('\t'));
+  navigator.clipboard.writeText([hdr,...rows].join('\n')).then(()=>{
+    const btn=document.getElementById('btnCopyClip');
+    btn.textContent='✅ Copied!'; setTimeout(()=>btn.textContent='📋 Copy Timeline to Clipboard',2000);
+  });
+};
+
+// Send via Apps Script
+document.getElementById('btnSendScript').onclick = () => {
+  const url=document.getElementById('gasUrl').value.trim();
+  if(!url){alert('Please paste your Apps Script Web App URL first.');return;}
+  const blocks=[...placed].sort((a,b)=>a.startMin-b.startMin);
+  if(!blocks.length){alert('No placed blocks to export yet.');return;}
+  const payload=blocks.map(pb=>({
+    name:pb.name, start:fmtHHMM(pb.startMin),
+    end:fmtHHMM(pb.startMin+pb.duration), duration:pb.duration,
+    date:fmtDay(pb.startMin),
+    placedAt:pb.placedAt?new Date(pb.placedAt).toLocaleString():'N/A'
+  }));
+  const btn=document.getElementById('btnSendScript');
+  btn.textContent='⏳ Sending...'; btn.disabled=true;
+  fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows:payload})})
+    .then(()=>{ btn.textContent='✅ Sent!'; btn.disabled=false; setTimeout(()=>btn.textContent='🚀 Send to Google Sheet',3000); })
+    .catch(()=>{ btn.textContent='❌ Failed'; btn.disabled=false; setTimeout(()=>btn.textContent='🚀 Send to Google Sheet',3000); });
+};
+
+// Archive old blocks
+document.getElementById('btnArchiveNow').onclick = () => {
+  const sevenAgo=Date.now()-7*24*60*60*1000;
+  const archive=placed.filter(pb=>pb.placedAt&&pb.placedAt<sevenAgo);
+  if(!archive.length){alert('No blocks older than 7 days to archive.');return;}
+  archive.forEach(pb=>pb.el.remove());
+  placed=placed.filter(pb=>!archive.includes(pb));
+  refreshExportModal(); updateNotepad(); updateCountdownGuides();
+  alert(`✅ Archived ${archive.length} block(s) removed from timeline.`);
+};
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+rebuildRuler(); // build time ruler
+buildDropZone(); // build timeline backgrounds
+updateNow(); // show now line
+setInterval(updateNow, 10000); // refresh now line every 10s
+renderParking(); // render parked blocks
+updateSliderLabel(); // initialize slider label
+startCounterInterval(); // start live counters
+
+// Restore notepad
+const savedNote = localStorage.getItem(LS_NOTE);
+if (savedNote) document.getElementById('notepadText').value = savedNote;
+
+// Restore GAS URL
+const savedGas = localStorage.getItem(LS_GAS_URL);
+if (savedGas) document.getElementById('gasUrl').value = savedGas;
+
+// Restore placed blocks
+const savedPlaced = loadPlacedData();
+savedPlaced.forEach(pb => {
+  placeBlock(pb.blockId, pb.name, pb.color, pb.startMin, pb.duration, pb.id, pb.placedAt);
+});
+
+// Auto-save on any change
+const origUpdateNotepad = updateNotepad;
+updateNotepad = function() {
+  origUpdateNotepad();
+  localStorage.setItem(LS_NOTE, document.getElementById('notepadText').value);
+  saveState();
+};
+
+// Save GAS URL whenever user types it
+document.getElementById('gasUrl').addEventListener('input', e => {
+  localStorage.setItem(LS_GAS_URL, e.target.value);
+});
+
+// Save on page unload as a safety net
+window.addEventListener('beforeunload', saveState);
+
+setTimeout(()=>{
+  const m=Math.max(0,getNowMinutes()-30);
+  tlScroll.scrollTop=m2y(m); tSlider.value=m; updateSliderLabel();
+},100);
+</script>
+</body>
+</html>
