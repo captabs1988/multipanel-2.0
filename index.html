@@ -276,7 +276,8 @@ table.tbl input[type=time]:focus{border-bottom-color:var(--accent);background:rg
     <div class="pledge-toolbar">
       <button class="pledge-add-btn" onclick="openPledgeModal()" title="Add quote card">+</button>
       <h2>// Pledge — Morning Motivation</h2>
-      <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-left:auto;">+ to add • Drag to move • Corner to resize • Double-click to edit</span>
+      <button onclick="exportPledge()" style="margin-left:auto;font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#1e2330;color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0;">⬇ Export Text</button> 
+      <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Hover card → × to delete • Corner to resize • Double-click to edit</span>
     </div>
     <div class="pledge-canvas-wrap" id="pledgeWrap">
       <div class="pledge-canvas" id="pledgeCanvas"></div>
@@ -778,6 +779,15 @@ function deletePledgeCard(id){
   pledgeCards=pledgeCards.filter(function(c){return c.id!==id;});
   savePledge();renderPledge();
 }
+
+function exportPledge(){
+  if(!pledgeCards.length){alert('No pledge cards to export.');return;}
+  var txt=pledgeCards.map(function(c,i){return(i+1)+'. '+c.quote;}).join('\n\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download='MyPledges.txt';a.click();
+}
+  
 function editPledgeCard(id){
   var card=pledgeCards.find(function(c){return c.id===id;});if(!card)return;
   var nq=window.prompt('Edit your pledge:',card.quote);
