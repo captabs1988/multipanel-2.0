@@ -154,6 +154,10 @@ table.tbl input[type=time]:focus{border-bottom-color:var(--accent);background:rg
 .pledge-canvas-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#2a2f45 1px,transparent 1px);background-size:24px 24px;z-index:0;}
 /* cards */
 .pledge-card{position:absolute;padding:14px 16px;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:600;line-height:1.5;border:2px solid rgba(255,255,255,.12);box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:2;overflow:hidden;}
+.pledge-resize{position:absolute;bottom:0;right:0;width:20px;height:20px;cursor:se-resize;z-index:20;opacity:0;transition:opacity .15s;}
+.pledge-resize::after{content:'';position:absolute;bottom:4px;right:4px;width:9px;height:9px;border-right:2px solid rgba(255,255,255,.9);border-bottom:2px solid rgba(255,255,255,.9);}
+.pledge-card:hover .pledge-resize{opacity:1;}
+[data-theme="light"] .pledge-resize::after{border-color:rgba(0,0,0,.5);}
 .pledge-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.55);}
 .pledge-card .card-text{width:100%;word-break:break-word;pointer-events:none;}
 .pledge-card-del{position:absolute;top:-8px;right:-8px;width:18px;height:18px;border-radius:50%;background:#ef4444;border:2px solid #0d0f18;color:#fff;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;z-index:10;}
@@ -800,15 +804,12 @@ function renderPledge(){
   if(!canvas)return;
   canvas.innerHTML='';
   canvas.style.transform='translate('+pledgeOffX+'px,'+pledgeOffY+'px) scale('+pledgeScale+')';
-
   pledgeCards.forEach(function(card){
     var el=document.createElement('div');
     el.className='pledge-card';
     el.id=card.id;
-
     var w=card.w||220,h=card.h||130;
     var isRotated=(card.shape==='diamond');
-
     el.style.left=card.x+'px';
     el.style.top=card.y+'px';
     el.style.width=w+'px';
@@ -820,63 +821,48 @@ function renderPledge(){
     el.style.borderRadius=getBorderRadius(card.shape);
     el.style.clipPath=getClipPath(card.shape);
     if(isRotated)el.style.transform='rotate(45deg)';
-
     var txt=document.createElement('div');
     txt.className='card-text';
     if(isRotated)txt.style.transform='rotate(-45deg)';
     txt.textContent=card.quote;
     el.appendChild(txt);
-
-    // delete btn
     var del=document.createElement('button');
     del.className='pledge-card-del';del.textContent='×';
     (function(id){del.onclick=function(e){e.stopPropagation();deletePledgeCard(id);};})(card.id);
     el.appendChild(del);
-
-    // resize handle (bottom-right corner)
-    var res=document.createElement('div');
-    res.className='pledge-resize';
-    el.appendChild(res);
-
-    // double-click to edit
     (function(id){el.ondblclick=function(e){e.stopPropagation();editPledgeCard(id);};})(card.id);
-
-    // drag to move
-    (function(cobj,elem){
-      elem.addEventListener('mousedown',function(e){
-        if(e.target.classList.contains('pledge-card-del'))return;
-        if(e.target.classList.contains('pledge-resize'))return;
-        e.stopPropagation();
-        pledgeDragging=cobj;
-        pledgeDragOff.x=e.clientX/pledgeScale-cobj.x;
-        pledgeDragOff.y=e.clientY/pledgeScale-cobj.y;
-        elem.style.zIndex=100;
-      });
-    })(card,el);
-
-    // resize drag
-    (function(cobj,elem,resEl){
-      var resizing=false,rsX=0,rsY=0,rsW=0,rsH=0;
-      resEl.addEventListener('mousedown',function(e){
+    var res=document.createElement('div');
+    res.style.cssText='position:absolute;bottom:0;right:0;width:22px;height:22px;cursor:se-resize;z-index:20;';
+    var resInner=document.createElement('div');
+    resInner.style.cssText='position:absolute;bottom:4px;right:4px;width:10px;height:10px;border-right:2px solid rgba(255,255,255,.8);border-bottom:2px solid rgba(255,255,255,.8);';
+    res.appendChild(resInner);
+    el.appendChild(res);
+    el.addEventListener('mousedown',function(e){
+      if(e.target===res||res.contains(e.target)){
         e.stopPropagation();e.preventDefault();
-        resizing=true;rsX=e.clientX;rsY=e.clientY;rsW=cobj.w||220;rsH=cobj.h||130;
+        var rsX=e.clientX,rsY=e.clientY,rsW=card.w||220,rsH=card.h||130;
         function onMove(e){
-          if(!resizing)return;
-          cobj.w=Math.max(80,Math.round(rsW+(e.clientX-rsX)/pledgeScale));
-          cobj.h=Math.max(50,Math.round(rsH+(e.clientY-rsY)/pledgeScale));
-          elem.style.width=cobj.w+'px';
-          elem.style.height=cobj.h+'px';
+          card.w=Math.max(80,Math.round(rsW+(e.clientX-rsX)/pledgeScale));
+          card.h=Math.max(50,Math.round(rsH+(e.clientY-rsY)/pledgeScale));
+          el.style.width=card.w+'px';
+          el.style.height=card.h+'px';
         }
         function onUp(){
-          resizing=false;savePledge();
+          savePledge();
           document.removeEventListener('mousemove',onMove);
           document.removeEventListener('mouseup',onUp);
         }
         document.addEventListener('mousemove',onMove);
         document.addEventListener('mouseup',onUp);
-      });
-    })(card,el,res);
-
+        return;
+      }
+      if(e.target.classList.contains('pledge-card-del'))return;
+      e.stopPropagation();
+      pledgeDragging=card;
+      pledgeDragOff.x=e.clientX/pledgeScale-card.x;
+      pledgeDragOff.y=e.clientY/pledgeScale-card.y;
+      el.style.zIndex=100;
+    });
     canvas.appendChild(el);
   });
 }
