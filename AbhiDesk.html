@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AbhiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1117;--surface:#171b24;--border:#252b38;--accent:#6c8aff;--accent2:#a78bfa;--gold:#f59e0b;--green:#34d399;--text:#e2e8f0;--muted:#64748b;}
+[data-theme="light"]{--bg:#f0f2f8;--surface:#ffffff;--border:#d1d8e8;--accent:#3a5fd9;--accent2:#7c3aed;--gold:#d97706;--green:#059669;--text:#1a2040;--muted:#6b7494;}
+[data-theme="light"] .tab-bar{box-shadow:0 1px 6px rgba(0,0,0,.08);}
+[data-theme="light"] table.tbl th{background:#f8f9fd;}
+[data-theme="light"] table.tbl tr.mhdr td{background:#eef1fb;}
+[data-theme="light"] table.tbl td{border-bottom-color:#e8ecf5;}
+[data-theme="light"] table.tbl tr:hover td{background:rgba(0,0,0,.02);}
+[data-theme="light"] table.tbl tr.today td{background:rgba(58,95,217,.06);}
+[data-theme="light"] table.tbl tr.today:hover td{background:rgba(58,95,217,.1);}
+[data-theme="light"] .tsel,[data-theme="light"] .tbtn{background:#f0f2f8;}
+[data-theme="light"] .sheet-setup input{background:#f0f2f8;}
+[data-theme="light"] .sheet-bar button{background:#f0f2f8;}
+[data-theme="light"] .cbtn{border-color:#c0c8dc;}
+[data-theme="light"] .star{color:#c0c8dc;}
+[data-theme="light"] table.tbl input[type=time]{border-bottom-color:#c0c8dc;color-scheme:light;}
+[data-theme="light"] .sinp{border-bottom-color:#c0c8dc;}
+[data-theme="light"] .tscroll::-webkit-scrollbar-thumb{background:#c8d0e4;}
+[data-theme="light"] #tracker-panel,[data-theme="light"] #sheet-panel{background:var(--bg);}
+/* theme toggle button */
+.theme-toggle{margin-left:8px;padding:0 11px;height:30px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0;transition:border-color .2s,background .2s;font-family:'JetBrains Mono',monospace;user-select:none;}
+.theme-toggle:hover{border-color:var(--accent);}
+.theme-toggle .tt-icon{font-size:15px;transition:transform .3s;}
+.theme-toggle .tt-lbl{font-size:10px;font-weight:500;letter-spacing:.5px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+.tab-bar{display:flex;align-items:stretch;background:var(--surface);border-bottom:1px solid var(--border);height:48px;flex-shrink:0;padding:0 8px;gap:2px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);display:flex;align-items:center;padding:0 16px 0 8px;border-right:1px solid var(--border);margin-right:6px;flex-shrink:0;user-select:none;}
+.logo span{color:var(--accent2);}
+.tab{display:flex;align-items:center;gap:7px;padding:0 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;border-top:none;border-left:none;border-right:none;white-space:nowrap;flex-shrink:0;background:none;font-family:'Syne',sans-serif;transition:color .15s,border-color .15s;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab.drag-over{border-left:2px solid var(--accent);}
+.panel-area{flex:1;overflow:hidden;position:relative;}
+.panel{position:absolute;inset:0;display:none;}
+.panel.active{display:block;}
+iframe{width:100%;height:100%;border:none;display:block;}
+#tracker-panel{background:var(--bg);flex-direction:column;overflow:hidden;}
+#tracker-panel.active{display:flex;}
+#sheet-panel{background:var(--bg);flex-direction:column;overflow:hidden;}
+#sheet-panel.active{display:flex;}
+.toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+.toolbar h2{font-size:12px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.tsel,.tbtn{font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#1e2330;color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;}
+.tbtn:hover{border-color:var(--accent);color:var(--accent);}
+.thint{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-left:auto;white-space:nowrap;}
+.t-layout{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:175px;min-width:175px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 12px;gap:10px;overflow-y:auto;flex-shrink:0;}
+.sb-title{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.prod-btn{width:100%;padding:12px 8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;text-align:center;line-height:1.4;transition:transform .1s,box-shadow .15s;box-shadow:0 3px 10px rgba(34,197,94,.35);}
+.prod-btn:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(34,197,94,.5);}
+.prod-btn:active{transform:scale(.96);}
+.prod-sub{display:block;font-size:9px;font-weight:400;opacity:.8;margin-top:3px;font-family:'JetBrains Mono',monospace;}
+.toast{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--green);text-align:center;padding:8px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);border-radius:8px;line-height:1.5;display:none;}
+.toast.show{display:block;}
+.sb-hr{border:none;border-top:1px solid var(--border);}
+.sb-stat{display:flex;flex-direction:column;gap:2px;}
+.s-lbl{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.5px;}
+.s-val{font-size:20px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;line-height:1;}
+.s-sub{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.tscroll{flex:1;overflow:auto;padding:0 14px 40px;}
+.tscroll::-webkit-scrollbar{width:5px;height:5px;}
+.tscroll::-webkit-scrollbar-thumb{background:#252b38;border-radius:4px;}
+table.tbl{border-collapse:collapse;font-size:11px;min-width:880px;width:100%;}
+table.tbl thead tr{position:sticky;top:0;z-index:10;}
+table.tbl th{background:#171b24;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;padding:8px 6px;border-bottom:2px solid var(--border);white-space:nowrap;text-align:center;}
+table.tbl th.cd{text-align:left;min-width:110px;padding-left:8px;}
+table.tbl td{border-bottom:1px solid #1a1f2c;padding:3px 4px;vertical-align:middle;text-align:center;}
+table.tbl td.cd{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);padding:3px 8px;white-space:nowrap;}
+table.tbl tr.today td{background:rgba(108,138,255,.07);}
+table.tbl tr.today td.cd{color:var(--accent);font-weight:700;}
+table.tbl tr:hover td{background:rgba(255,255,255,.02);}
+table.tbl tr.today:hover td{background:rgba(108,138,255,.1);}
+table.tbl tr.mhdr td{background:#1a1f2c;color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;text-align:left;padding:6px 8px;border-top:2px solid var(--border);}
+table.tbl input[type=time]{background:transparent;border:none;border-bottom:1px solid #2d3547;color:var(--text);font-size:10px;font-family:'JetBrains Mono',monospace;width:70px;text-align:center;padding:2px 0;outline:none;cursor:pointer;color-scheme:dark;}
+table.tbl input[type=time]:focus{border-bottom-color:var(--accent);background:rgba(108,138,255,.08);border-radius:3px 3px 0 0;}
+.gap{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);min-width:42px;}
+.gap.long{color:var(--gold);}
+.cbtn{background:none;border:1px solid #2d3547;width:22px;height:22px;border-radius:5px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;margin:0 auto;color:transparent;transition:background .12s,border-color .12s;}
+.cbtn:hover{border-color:var(--green);}
+.cbtn.on{background:var(--green);border-color:var(--green);color:#0a1a0f;}
+.stars{display:flex;justify-content:center;gap:1px;}
+.star{background:none;border:none;cursor:pointer;font-size:13px;line-height:1;padding:1px;color:#2d3547;transition:transform .1s;}
+.star:hover{transform:scale(1.25);color:var(--gold);}
+.star.on{color:var(--gold);}
+.sinp{background:transparent;border:none;border-bottom:1px solid #2d3547;color:var(--text);font-size:11px;font-family:'JetBrains Mono',monospace;width:34px;text-align:center;padding:2px 0;outline:none;}
+.sinp:focus{border-bottom-color:var(--accent);}
+.sheet-setup{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:40px;}
+.sheet-setup h2{font-size:20px;font-weight:700;color:var(--accent);}
+.sheet-setup p{font-size:13px;color:var(--muted);text-align:center;max-width:480px;line-height:1.8;}
+.sheet-setup input{width:100%;max-width:560px;padding:11px 15px;background:#1e2330;border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;}
+.sheet-setup input:focus{border-color:var(--accent);}
+.sheet-setup .lbtn{padding:11px 28px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;}
+.sheet-hint{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center;max-width:500px;line-height:1.9;}
+.sheet-loaded{display:flex;flex-direction:column;height:100%;}
+.sheet-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.sheet-bar span{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sheet-bar button{font-size:11px;padding:5px 11px;background:#1e2330;border:1px solid var(--border);color:var(--text);border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;}
+.sheet-bar button:hover{border-color:var(--accent);color:var(--accent);}
+/* gym workout dropdown */
+.gym-sel{background:transparent;border:none;border-bottom:1px solid #2d3547;color:var(--text);font-size:9px;font-family:'JetBrains Mono',monospace;width:80px;padding:2px 0;outline:none;cursor:pointer;color-scheme:dark;-webkit-appearance:none;appearance:none;}
+.gym-sel:focus{border-bottom-color:var(--accent);}
+[data-theme="light"] .gym-sel{border-bottom-color:#c0c8dc;color-scheme:light;}
+.gym-other{background:transparent;border:none;border-bottom:1px solid var(--accent);color:var(--text);font-size:9px;font-family:'JetBrains Mono',monospace;width:72px;padding:2px 0;outline:none;}
+/* sleep duration cell */
+.sleepdur{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent2);min-width:42px;}
+/* pledge panel */
+#pledge-panel{background:#0d0f18;flex-direction:column;overflow:hidden;}
+#pledge-panel.active{display:flex;}
+.pledge-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#12141f;border-bottom:1px solid #1e2235;flex-shrink:0;}
+.pledge-toolbar h2{font-size:12px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;}
+.pledge-add-btn{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(108,138,255,.4);}
+.pledge-add-btn:hover{transform:scale(1.12);box-shadow:0 4px 14px rgba(108,138,255,.6);}
+/* n8n-style canvas */
+.pledge-canvas-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;}
+.pledge-canvas-wrap.panning{cursor:grabbing;}
+.pledge-canvas{position:absolute;top:0;left:0;transform-origin:0 0;}
+/* dot-grid background like n8n */
+.pledge-canvas-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,#2a2f45 1px,transparent 1px);
+  background-size:24px 24px;z-index:0;}
+/* quote cards */
+.pledge-card{position:absolute;border-radius:12px;padding:14px 16px;cursor:pointer;user-select:none;min-width:140px;min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;line-height:1.5;border:2px solid rgba(255,255,255,.1);box-shadow:0 4px 20px rgba(0,0,0,.35);transition:box-shadow .15s,transform .1s;z-index:2;}
+.pledge-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateY(-2px);}
+.pledge-card.selected{outline:2px solid var(--accent);outline-offset:2px;}
+.pledge-card-del{position:absolute;top:-8px;right:-8px;width:18px;height:18px;border-radius:50%;background:#ef4444;border:2px solid #0d0f18;color:#fff;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;z-index:5;}
+.pledge-card:hover .pledge-card-del{opacity:1;}
+/* shape picker modal */
+.pledge-modal-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+.pledge-modal-back.open{display:flex;}
+.pledge-modal{background:#171b24;border:1px solid #252b38;border-radius:16px;padding:22px;width:340px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.pledge-modal h3{font-size:14px;font-weight:700;color:var(--text);}
+.pm-section-lbl{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.pm-shapes{display:flex;gap:8px;flex-wrap:wrap;}
+.pm-shape{width:40px;height:40px;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;transition:border-color .12s,transform .1s;}
+.pm-shape:hover{transform:scale(1.1);}
+.pm-shape.sel{border-color:var(--accent);border-radius:6px;}
+.pm-shape svg{width:32px;height:32px;}
+.pm-colors{display:flex;gap:6px;flex-wrap:wrap;}
+.pm-color{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s,border-color .1s;}
+.pm-color:hover{transform:scale(1.15);}
+.pm-color.sel{border-color:#fff;}
+.pm-quote-inp{width:100%;padding:8px 10px;background:#1e2330;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Syne',sans-serif;outline:none;resize:vertical;min-height:64px;}
+.pm-quote-inp:focus{border-color:var(--accent);}
+.pm-actions{display:flex;gap:8px;justify-content:flex-end;}
+.pm-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:#1e2330;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;}
+.pm-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pm-btn:hover{border-color:var(--accent);}
+.pm-btn.primary:hover{background:#5a78f0;}
+</style>
+</head>
+<body>
+
+<div class="tab-bar" id="tabBar">
+  <div class="logo">Abhi<span>Desk</span></div>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+    <span class="tt-icon" id="ttIcon">☀️</span>
+    <span class="tt-lbl" id="ttLbl">LIGHT</span>
+  </button>
+  <button class="tab active" id="tab-tracker" onclick="switchTab('tracker')" ondblclick="renameTab('tracker')" draggable="true"><span>📊</span><span id="lbl-tracker">2026 Daily Log</span></button>
+  <button class="tab" id="tab-pledge" onclick="switchTab('pledge')" ondblclick="renameTab('pledge')" draggable="true"><span>🔥</span><span id="lbl-pledge">Pledge</span></button>
+  <button class="tab" id="tab-sheet" onclick="switchTab('sheet')" ondblclick="renameTab('sheet')" draggable="true"><span>📋</span><span id="lbl-sheet">Checklist Sheet</span></button>
+  <button class="tab" id="tab-dayflow" onclick="switchTab('dayflow')" ondblclick="renameTab('dayflow')" draggable="true"><span>📅</span><span id="lbl-dayflow">DayFlow</span></button>
+  <button class="tab" id="tab-codetrack" onclick="switchTab('codetrack')" ondblclick="renameTab('codetrack')" draggable="true"><span>💻</span><span id="lbl-codetrack">Code Tracker</span></button>
+  <button class="tab" id="tab-breathe" onclick="switchTab('breathe')" ondblclick="renameTab('breathe')" draggable="true"><span>🫁</span><span id="lbl-breathe">Breathe</span></button>
+</div>
+
+<div class="panel-area">
+  <div class="panel" id="panel-dayflow"><iframe id="fr-dayflow" src="dayflow.html"></iframe></div>
+  <div class="panel" id="panel-breathe"><iframe id="fr-breathe"></iframe></div>
+  <div class="panel" id="panel-codetrack"><iframe id="fr-codetrack"></iframe></div>
+
+  <div class="panel active" id="tracker-panel">
+    <div class="toolbar">
+      <h2>// 2026 Daily Log</h2>
+      <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Rating:</span>
+      <select class="tsel" id="rMode" onchange="setRMode(this.value)"><option value="5">★ Stars 1–5</option><option value="10"># Score 1–10</option></select>
+      <button class="tbtn" onclick="doExport()">⬇ Export CSV</button>
+      <button class="tbtn" onclick="goToday()">📍 Today</button>
+      <span class="thint">Double-click any tab label to rename it</span>
+    </div>
+    <div class="t-layout">
+      <div class="sidebar">
+        <span class="sb-title">Quick Actions</span>
+        <button class="prod-btn" onclick="prodStart()">🚀 Productivity<br>Started!<span class="prod-sub">stamps work start time</span></button>
+        <div class="toast" id="toast"></div>
+        <hr class="sb-hr">
+        <span class="sb-title">This Week</span>
+        <div class="sb-stat"><span class="s-lbl">Gym</span><span class="s-val" id="sg">0</span><span class="s-sub">sessions</span></div>
+        <div class="sb-stat"><span class="s-lbl">Meditation</span><span class="s-val" id="sm">0</span><span class="s-sub">sessions</span></div>
+        <div class="sb-stat"><span class="s-lbl">Avg Rating</span><span class="s-val" id="sa">—</span><span class="s-sub">out of 5</span></div>
+        <hr class="sb-hr">
+        <span class="sb-title">All 2026</span>
+        <div class="sb-stat"><span class="s-lbl">Gym Total</span><span class="s-val" id="sga">0</span><span class="s-sub">days</span></div>
+        <div class="sb-stat"><span class="s-lbl">Days Logged</span><span class="s-val" id="sdl">0</span><span class="s-sub">entries</span></div>
+      </div>
+      <div class="tscroll" id="tscroll">
+        <table class="tbl">
+          <thead><tr>
+            <th class="cd">Day / Date</th><th>Sleep Time</th><th>Wake Up</th><th>Work Start</th><th>Gap</th>
+            <th>Stretches</th><th>Core</th><th>Flexibility</th><th>Gym</th><th>Gym Session</th><th>Meditation</th>
+            <th>Day Rating</th><th>Slept</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="sheet-panel">
+    <div id="sSetup" class="sheet-setup">
+      <div style="font-size:48px;">📋</div>
+      <h2>Google Sheet Checklist</h2>
+      <p>Paste your Google Sheet <strong>published URL</strong> below.<br>Your checklist loads live inside this panel.</p>
+      <input type="url" id="sUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pubhtml">
+      <button class="lbtn" onclick="loadSheet()">Load Sheet</button>
+      <div class="sheet-hint">In Google Sheets → File → Share → Publish to web → Web page → Copy the URL</div>
+    </div>
+    <div id="sLoaded" class="sheet-loaded" style="display:none">
+      <div class="sheet-bar"><span id="sLbl">—</span><button onclick="refreshSheet()">🔄 Refresh</button><button onclick="changeSheet()">✏️ Change URL</button></div>
+      <iframe id="sFr" style="flex:1;background:#fff;"></iframe>
+    </div>
+  </div>
+
+  <!-- PLEDGE PANEL -->
+  <div class="panel" id="pledge-panel">
+    <div class="pledge-toolbar">
+      <button class="pledge-add-btn" onclick="openPledgeModal()" title="Add quote card">+</button>
+      <h2>// Pledge — Morning Motivation</h2>
+      <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-left:auto;">Click + to add a quote card • Drag cards to move • Double-click to edit</span>
+    </div>
+    <div class="pledge-canvas-wrap" id="pledgeWrap">
+      <div class="pledge-canvas" id="pledgeCanvas"></div>
+    </div>
+  </div>
+
+  <!-- PLEDGE MODAL -->
+  <div class="pledge-modal-back" id="pledgeModalBack">
+    <div class="pledge-modal">
+      <h3>✦ New Quote Card</h3>
+      <div>
+        <div class="pm-section-lbl" style="margin-bottom:6px;">Shape</div>
+        <div class="pm-shapes" id="pmShapes">
+          <div class="pm-shape sel" data-shape="rect" onclick="selShape(this,'rect')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="4" fill="currentColor" opacity=".7"/></svg></div>
+          <div class="pm-shape" data-shape="round" onclick="selShape(this,'round')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="10" fill="currentColor" opacity=".7"/></svg></div>
+          <div class="pm-shape" data-shape="circle" onclick="selShape(this,'circle')"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="currentColor" opacity=".7"/></svg></div>
+          <div class="pm-shape" data-shape="diamond" onclick="selShape(this,'diamond')"><svg viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="currentColor" opacity=".7"/></svg></div>
+          <div class="pm-shape" data-shape="banner" onclick="selShape(this,'banner')"><svg viewBox="0 0 32 32"><polygon points="2,8 30,8 26,16 30,24 2,24" fill="currentColor" opacity=".7"/></svg></div>
+        </div>
+      </div>
+      <div>
+        <div class="pm-section-lbl" style="margin-bottom:6px;">Colour</div>
+        <div class="pm-colors" id="pmColors">
+          <div class="pm-color sel" data-color="#1e2a4a" style="background:#1e2a4a" onclick="selColor(this,'#1e2a4a')"></div>
+          <div class="pm-color" data-color="#2d1b4e" style="background:#2d1b4e" onclick="selColor(this,'#2d1b4e')"></div>
+          <div class="pm-color" data-color="#1a3a2a" style="background:#1a3a2a" onclick="selColor(this,'#1a3a2a')"></div>
+          <div class="pm-color" data-color="#3a1a1a" style="background:#3a1a1a" onclick="selColor(this,'#3a1a1a')"></div>
+          <div class="pm-color" data-color="#2a2a1a" style="background:#2a2a1a" onclick="selColor(this,'#2a2a1a')"></div>
+          <div class="pm-color" data-color="#1a2a3a" style="background:#1a2a3a" onclick="selColor(this,'#1a2a3a')"></div>
+          <div class="pm-color" data-color="#6c8aff" style="background:#6c8aff" onclick="selColor(this,'#6c8aff')"></div>
+          <div class="pm-color" data-color="#a78bfa" style="background:#a78bfa" onclick="selColor(this,'#a78bfa')"></div>
+          <div class="pm-color" data-color="#34d399" style="background:#34d399" onclick="selColor(this,'#34d399')"></div>
+          <div class="pm-color" data-color="#f59e0b" style="background:#f59e0b" onclick="selColor(this,'#f59e0b')"></div>
+          <div class="pm-color" data-color="#f87171" style="background:#f87171" onclick="selColor(this,'#f87171')"></div>
+          <div class="pm-color" data-color="#38bdf8" style="background:#38bdf8" onclick="selColor(this,'#38bdf8')"></div>
+        </div>
+      </div>
+      <div>
+        <div class="pm-section-lbl" style="margin-bottom:6px;">Your Quote / Pledge</div>
+        <textarea class="pm-quote-inp" id="pmQuote" placeholder="Enter your motivational quote or pledge..."></textarea>
+      </div>
+      <div class="pm-actions">
+        <button class="pm-btn" onclick="closePledgeModal()">Cancel</button>
+        <button class="pm-btn primary" onclick="addPledgeCard()">Add Card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── TABS ──
+var TABS=['tracker','pledge','sheet','dayflow','codetrack','breathe'];
+var PANEL={'dayflow':'panel-dayflow','breathe':'panel-breathe','codetrack':'panel-codetrack','tracker':'tracker-panel','sheet':'sheet-panel','pledge':'pledge-panel'};
+var ISRC={'breathe':'breathe.html','codetrack':'codetrack.html','dayflow':'dayflow.html'};
+var loaded={tracker:true};
+
+function switchTab(id){
+  TABS.forEach(function(t){
+    document.getElementById('tab-'+t).classList.remove('active');
+    document.getElementById(PANEL[t]).classList.remove('active');
+  });
+  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById(PANEL[id]).classList.add('active');
+  if(ISRC[id]&&!loaded[id]){document.getElementById('fr-'+id).src=ISRC[id];loaded[id]=true;}
+  if(id==='tracker')updateStats();
+  if(id==='pledge')renderPledge();
+}
+
+function renameTab(id){
+  var sp=document.getElementById('lbl-'+id);
+  var orig=sp.textContent;
+  sp.contentEditable='true';
+  sp.style.cssText='outline:none;background:rgba(108,138,255,.2);border-radius:4px;padding:1px 5px;';
+  sp.focus();
+  var r=document.createRange();r.selectNodeContents(sp);
+  var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+  sp.onblur=function(){
+    sp.contentEditable='false';sp.style.cssText='';
+    var v=sp.textContent.trim()||orig;sp.textContent=v;
+    localStorage.setItem('adlbl_'+id,v);
+  };
+  sp.onkeydown=function(e){
+    if(e.key==='Enter'){e.preventDefault();sp.blur();}
+    if(e.key==='Escape'){sp.textContent=orig;sp.blur();}
+    e.stopPropagation();
+  };
+}
+TABS.forEach(function(id){var v=localStorage.getItem('adlbl_'+id);if(v)document.getElementById('lbl-'+id).textContent=v;});
+
+// Drag reorder
+var dragSrc=null;
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('dragstart',function(e){dragSrc=tab;e.dataTransfer.effectAllowed='move';setTimeout(function(){tab.style.opacity='.4';},0);});
+  tab.addEventListener('dragend',function(){tab.style.opacity='';document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('drag-over');});});
+  tab.addEventListener('dragover',function(e){e.preventDefault();if(dragSrc&&dragSrc!==tab)tab.classList.add('drag-over');});
+  tab.addEventListener('dragleave',function(){tab.classList.remove('drag-over');});
+  tab.addEventListener('drop',function(e){
+    e.preventDefault();tab.classList.remove('drag-over');
+    if(dragSrc&&dragSrc!==tab){
+      var bar=document.getElementById('tabBar');
+      var all=[].slice.call(bar.querySelectorAll('.tab'));
+      bar.insertBefore(dragSrc,all.indexOf(dragSrc)<all.indexOf(tab)?tab.nextSibling:tab);
+    }
+  });
+});
+
+// ── TRACKER ──
+var LS='ad2026';
+var D={};var rMode=5;
+try{D=JSON.parse(localStorage.getItem(LS)||'{}');}catch(e){}
+function sv(){try{localStorage.setItem(LS,JSON.stringify(D));}catch(e){}}
+function dk(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function pad(n){return String(n).padStart(2,'0');}
+function gap(w,s){
+  if(!w||!s)return'';
+  var wp=w.split(':').map(Number),sp=s.split(':').map(Number);
+  var d=(sp[0]*60+sp[1])-(wp[0]*60+wp[1]);
+  if(isNaN(d)||d<=0)return'';
+  var h=Math.floor(d/60),m=d%60;
+  return h>0?h+'h '+m+'m':m+'m';
+}
+function isLong(w,s){if(!w||!s)return false;var wp=w.split(':').map(Number),sp=s.split(':').map(Number);return(sp[0]*60+sp[1])-(wp[0]*60+wp[1])>=120;}
+function setRMode(v){rMode=parseInt(v);build();}
+
+function prodStart(){
+  var now=new Date();
+  var key=dk(now);
+  var t=pad(now.getHours())+':'+pad(now.getMinutes());
+  if(!D[key])D[key]={};
+  D[key].workStart=t;sv();
+  var el=document.getElementById('ws-'+key);
+  if(el){el.value=t;refreshGap(key);}
+  var MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var dl=DN[now.getDay()]+' '+now.getDate()+' '+MN[now.getMonth()];
+  var toast=document.getElementById('toast');
+  toast.innerHTML='&#10003; Productivity Started!<br><strong style="color:#e2e8f0">'+dl+'</strong><br>'+t;
+  toast.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt=setTimeout(function(){toast.classList.remove('show');},4000);
+  goToday();
+}
+
+function refreshGap(key){
+  var c=document.getElementById('gap-'+key);if(!c)return;
+  var row=D[key]||{};
+  c.textContent=gap(row.wake,row.workStart);
+  c.className='gap'+(isLong(row.wake,row.workStart)?' long':'');
+}
+function slept(sleepT,wakeT){
+  if(!sleepT||!wakeT)return'';
+  var sp=sleepT.split(':').map(Number),wp=wakeT.split(':').map(Number);
+  var sm=sp[0]*60+sp[1],wm=wp[0]*60+wp[1];
+  if(wm<=sm)wm+=24*60; // crossed midnight
+  var d=wm-sm;
+  if(d<=0||d>24*60)return'';
+  var h=Math.floor(d/60),m=d%60;
+  return h+'h'+(m>0?' '+m+'m':'');
+}
+function refreshSlept(key){
+  var c=document.getElementById('slept-'+key);if(!c)return;
+  var row=D[key]||{};
+  c.textContent=slept(row.sleep,row.wake);
+}
+
+function buildRating(td,key,cur){
+  td.innerHTML='';
+  if(rMode===5){
+    var row=document.createElement('div');row.className='stars';
+    for(var i=1;i<=5;i++){
+      var b=document.createElement('button');b.className='star'+(i<=cur?' on':'');b.textContent='★';
+      (function(v){b.onclick=function(){if(!D[key])D[key]={};D[key].rating=D[key].rating===v?0:v;sv();buildRating(td,key,D[key].rating);updateStats();};})(i);
+      row.appendChild(b);
+    }
+    td.appendChild(row);
+  }else{
+    var inp=document.createElement('input');inp.className='sinp';inp.type='text';inp.placeholder='/10';inp.value=cur||'';
+    inp.onchange=function(){var v=Math.min(10,Math.max(0,parseInt(this.value)||0));if(!D[key])D[key]={};D[key].rating=v;this.value=v||'';sv();updateStats();};
+    td.appendChild(inp);
+  }
+}
+
+function build(){
+  var tbody=document.getElementById('tbody');tbody.innerHTML='';
+  var today=new Date();today.setHours(0,0,0,0);
+  var todayKey=dk(today);
+  var MONTHS=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var lastM=-1;
+  for(var d=new Date(2026,0,1);d.getFullYear()===2026;d.setDate(d.getDate()+1)){
+    var key=dk(d),row=D[key]||{},month=d.getMonth();
+    if(month!==lastM){
+      lastM=month;
+      var mr=document.createElement('tr');mr.className='mhdr';
+      var mc=document.createElement('td');mc.colSpan=13;mc.textContent='── '+MONTHS[month]+' 2026 ──';
+      mr.appendChild(mc);tbody.appendChild(mr);
+    }
+    var tr=document.createElement('tr');
+    if(key===todayKey){tr.className='today';tr.id='today-row';}
+    // date
+    var td0=document.createElement('td');td0.className='cd';
+    td0.textContent=DAYS[d.getDay()]+', '+d.getDate()+' '+MONS[month];tr.appendChild(td0);
+    // sleep time (first data col)
+    var tdSl=document.createElement('td'),sli=document.createElement('input');
+    sli.type='time';sli.value=row.sleep||'';sli.id='sl-'+key;
+    (function(k){sli.onchange=function(){if(!D[k])D[k]={};D[k].sleep=this.value;sv();refreshSlept(k);};})(key);
+    tdSl.appendChild(sli);tr.appendChild(tdSl);
+    // wake up
+    var td1=document.createElement('td'),wi=document.createElement('input');
+    wi.type='time';wi.value=row.wake||'';wi.id='wu-'+key;
+    (function(k){wi.onchange=function(){if(!D[k])D[k]={};D[k].wake=this.value;sv();refreshGap(k);refreshSlept(k);};})(key);
+    td1.appendChild(wi);tr.appendChild(td1);
+    // work start
+    var td2=document.createElement('td'),si=document.createElement('input');
+    si.type='time';si.value=row.workStart||'';si.id='ws-'+key;
+    (function(k){si.onchange=function(){if(!D[k])D[k]={};D[k].workStart=this.value;sv();refreshGap(k);};})(key);
+    td2.appendChild(si);tr.appendChild(td2);
+    // gap (wake→work)
+    var td3=document.createElement('td');td3.id='gap-'+key;td3.className='gap'+(isLong(row.wake,row.workStart)?' long':'');
+    td3.textContent=gap(row.wake,row.workStart);tr.appendChild(td3);
+    // checkboxes: stretches, core, flexibility
+    ['stretches','core','flexibility'].forEach(function(col){
+      var tdc=document.createElement('td'),btn=document.createElement('button');
+      btn.className='cbtn'+(row[col]?' on':'');btn.textContent=row[col]?'✓':'';
+      (function(k,c,b){btn.onclick=function(){if(!D[k])D[k]={};D[k][c]=!D[k][c];b.className='cbtn'+(D[k][c]?' on':'');b.textContent=D[k][c]?'✓':'';sv();updateStats();};})(key,col,btn);
+      tdc.appendChild(btn);tr.appendChild(tdc);
+    });
+    // gym checkbox
+    var tdGym=document.createElement('td'),gbtn=document.createElement('button');
+    gbtn.className='cbtn'+(row.gym?' on':'');gbtn.textContent=row.gym?'✓':'';
+    (function(k,b){gbtn.onclick=function(){if(!D[k])D[k]={};D[k].gym=!D[k].gym;b.className='cbtn'+(D[k].gym?' on':'');b.textContent=D[k].gym?'✓':'';sv();updateStats();};})(key,gbtn);
+    tdGym.appendChild(gbtn);tr.appendChild(tdGym);
+    // gym session dropdown
+    var tdGS=document.createElement('td');
+    var gymSel=document.createElement('select');gymSel.className='gym-sel';
+    var gymOpts=['—','Back','Biceps','Chest','Triceps','Legs','Shoulders','Arms','Other'];
+    gymOpts.forEach(function(opt){var o=document.createElement('option');o.value=opt;o.textContent=opt;if(row.gymSession===opt)o.selected=true;gymSel.appendChild(o);});
+    (function(k,sel){
+      gymSel.onchange=function(){
+        if(!D[k])D[k]={};
+        D[k].gymSession=sel.value;
+        // show/hide "other" text input
+        var oi=document.getElementById('gymOther-'+k);
+        if(oi)oi.style.display=sel.value==='Other'?'inline':'none';
+        sv();
+      };
+    })(key,gymSel);
+    tdGS.appendChild(gymSel);
+    // "other" freetext input (hidden unless Other selected)
+    var gymOtherInp=document.createElement('input');
+    gymOtherInp.type='text';gymOtherInp.className='gym-other';
+    gymOtherInp.placeholder='specify…';gymOtherInp.id='gymOther-'+key;
+    gymOtherInp.value=row.gymOther||'';
+    gymOtherInp.style.display=row.gymSession==='Other'?'inline':'none';
+    (function(k){gymOtherInp.onchange=function(){if(!D[k])D[k]={};D[k].gymOther=this.value;sv();};})(key);
+    tdGS.appendChild(document.createElement('br'));
+    tdGS.appendChild(gymOtherInp);
+    tr.appendChild(tdGS);
+    // meditation checkbox
+    var tdMed=document.createElement('td'),mbtn=document.createElement('button');
+    mbtn.className='cbtn'+(row.meditation?' on':'');mbtn.textContent=row.meditation?'✓':'';
+    (function(k,b){mbtn.onclick=function(){if(!D[k])D[k]={};D[k].meditation=!D[k].meditation;b.className='cbtn'+(D[k].meditation?' on':'');b.textContent=D[k].meditation?'✓':'';sv();updateStats();};})(key,mbtn);
+    tdMed.appendChild(mbtn);tr.appendChild(tdMed);
+    // rating
+    var td9=document.createElement('td');td9.id='rating-'+key;buildRating(td9,key,row.rating||0);tr.appendChild(td9);
+    // slept duration (auto from sleep→wake)
+    var tdSD=document.createElement('td');tdSD.id='slept-'+key;tdSD.className='sleepdur';
+    tdSD.textContent=slept(row.sleep,row.wake);tr.appendChild(tdSD);
+    tbody.appendChild(tr);
+  }
+  updateStats();
+}
+
+function updateStats(){
+  var today=new Date();today.setHours(0,0,0,0);
+  var gw=0,mw=0,rs=0,rn=0,ga=0,dl=0;
+  for(var i=0;i<7;i++){var d=new Date(today);d.setDate(d.getDate()-i);var r=D[dk(d)];if(!r)continue;if(r.gym)gw++;if(r.meditation)mw++;if(r.rating){rs+=r.rating;rn++;}}
+  for(var k in D){var r=D[k];if(r.gym)ga++;if(Object.values(r).some(Boolean))dl++;}
+  document.getElementById('sg').textContent=gw;
+  document.getElementById('sm').textContent=mw;
+  document.getElementById('sa').textContent=rn?(rs/rn).toFixed(1):'—';
+  document.getElementById('sga').textContent=ga;
+  document.getElementById('sdl').textContent=dl;
+}
+
+function goToday(){var el=document.getElementById('today-row');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+
+function doExport(){
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var rows=[['Date','Sleep Time','Wake Up','Work Start','Gap','Stretches','Core','Flexibility','Gym','Gym Session','Meditation','Rating','Slept']];
+  for(var d=new Date(2026,0,1);d.getFullYear()===2026;d.setDate(d.getDate()+1)){
+    var r=D[dk(d)]||{};
+    var gymS=r.gymSession||'';if(gymS==='Other'&&r.gymOther)gymS='Other: '+r.gymOther;
+    rows.push([DAYS[d.getDay()]+' '+d.getDate()+' '+MONS[d.getMonth()],r.sleep||'',r.wake||'',r.workStart||'',gap(r.wake,r.workStart),r.stretches?'Yes':'',r.core?'Yes':'',r.flexibility?'Yes':'',r.gym?'Yes':'',gymS,r.meditation?'Yes':'',r.rating||'',slept(r.sleep,r.wake)]);
+  }
+  var csv=rows.map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='AbhiDesk_2026.csv';a.click();
+}
+
+// ── SHEET ──
+var SLS='ad_sheet';
+function loadSheet(){
+  var url=document.getElementById('sUrl').value.trim();
+  if(!url){alert('Please paste a published Google Sheets URL.');return;}
+  if(url.match(/\/(edit|view)/))url=url.replace(/\/(edit|view).*$/,'/pubhtml');
+  localStorage.setItem(SLS,url);applySheet(url);
+}
+function applySheet(url){document.getElementById('sSetup').style.display='none';document.getElementById('sLoaded').style.display='flex';document.getElementById('sLbl').textContent=url;document.getElementById('sFr').src=url;}
+function refreshSheet(){var u=localStorage.getItem(SLS);if(u){document.getElementById('sFr').src='';setTimeout(function(){document.getElementById('sFr').src=u;},100);}}
+function changeSheet(){localStorage.removeItem(SLS);document.getElementById('sSetup').style.display='flex';document.getElementById('sLoaded').style.display='none';document.getElementById('sUrl').value='';}
+var ss=localStorage.getItem(SLS);if(ss){document.getElementById('sUrl').value=ss;applySheet(ss);}
+
+// ── INIT ──
+build();
+setTimeout(goToday,200);
+
+// ── PLEDGE PANEL ──
+var PLEDGE_LS='ad_pledge';
+var pledgeCards=[];
+var pmShape='rect',pmColor='#1e2a4a';
+var pledgeScale=1,pledgeOffX=0,pledgeOffY=0;
+var pledgePanning=false,pledgePanStart={x:0,y:0,ox:0,oy:0};
+var pledgeDragging=null,pledgeDragOff={x:0,y:0};
+var pledgeEditId=null;
+
+try{pledgeCards=JSON.parse(localStorage.getItem(PLEDGE_LS)||'[]');}catch(e){}
+function savePledge(){try{localStorage.setItem(PLEDGE_LS,JSON.stringify(pledgeCards));}catch(e){}}
+
+function openPledgeModal(){
+  document.getElementById('pmQuote').value='';
+  document.getElementById('pledgeModalBack').classList.add('open');
+  setTimeout(function(){document.getElementById('pmQuote').focus();},100);
+}
+function closePledgeModal(){document.getElementById('pledgeModalBack').classList.remove('open');}
+
+function selShape(el,shape){
+  document.querySelectorAll('.pm-shape').forEach(function(s){s.classList.remove('sel');});
+  el.classList.add('sel');pmShape=shape;
+}
+function selColor(el,color){
+  document.querySelectorAll('.pm-color').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');pmColor=color;
+}
+
+function shapeStyle(shape,color){
+  var base='background:'+color+';';
+  if(shape==='rect')return base+'border-radius:10px;';
+  if(shape==='round')return base+'border-radius:40px;';
+  if(shape==='circle')return base+'border-radius:50%;width:160px;height:160px;';
+  if(shape==='diamond')return base+'transform:rotate(45deg);width:120px;height:120px;border-radius:8px;';
+  if(shape==='banner')return base+'border-radius:4px;clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);';
+  return base;
+}
+
+function textColor(hexColor){
+  // pick white or dark text based on bg brightness
+  var c=hexColor.replace('#','');
+  var r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
+  var lum=(0.299*r+0.587*g+0.114*b)/255;
+  return lum>0.55?'#1a2040':'#e2e8f0';
+}
+
+function addPledgeCard(){
+  var q=document.getElementById('pmQuote').value.trim();
+  if(!q){alert('Please enter a quote or pledge first.');return;}
+  var id='pc_'+Date.now();
+  // place in visible area
+  var wrap=document.getElementById('pledgeWrap');
+  var cx=(wrap.clientWidth/2-pledgeOffX)/pledgeScale-100;
+  var cy=(wrap.clientHeight/2-pledgeOffY)/pledgeScale-60;
+  // spread slightly
+  cx+=Math.round((Math.random()-0.5)*120);
+  cy+=Math.round((Math.random()-0.5)*80);
+  pledgeCards.push({id:id,shape:pmShape,color:pmColor,quote:q,x:Math.round(cx),y:Math.round(cy)});
+  savePledge();renderPledge();closePledgeModal();
+}
+
+function deletePledgeCard(id){
+  pledgeCards=pledgeCards.filter(function(c){return c.id!==id;});
+  savePledge();renderPledge();
+}
+
+function editPledgeCard(id){
+  var card=pledgeCards.find(function(c){return c.id===id;});if(!card)return;
+  // inline edit: prompt
+  var newQ=window.prompt('Edit your pledge:',card.quote);
+  if(newQ===null)return;
+  card.quote=newQ.trim()||card.quote;
+  savePledge();renderPledge();
+}
+
+function renderPledge(){
+  var canvas=document.getElementById('pledgeCanvas');
+  if(!canvas)return;
+  canvas.innerHTML='';
+  canvas.style.transform='translate('+pledgeOffX+'px,'+pledgeOffY+'px) scale('+pledgeScale+')';
+
+  pledgeCards.forEach(function(card){
+    var el=document.createElement('div');
+    el.className='pledge-card';
+    el.id=card.id;
+    el.style.cssText=shapeStyle(card.shape,card.color)+'left:'+card.x+'px;top:'+card.y+'px;color:'+textColor(card.color)+';';
+    // diamond: wrap text in inner div to counter-rotate
+    if(card.shape==='diamond'){
+      var inner=document.createElement('div');
+      inner.style.cssText='transform:rotate(-45deg);padding:8px;max-width:100px;word-break:break-word;';
+      inner.textContent=card.quote;el.appendChild(inner);
+    } else {
+      el.textContent=card.quote;
+    }
+    // delete button
+    var del=document.createElement('button');del.className='pledge-card-del';del.textContent='×';
+    (function(id){del.onclick=function(e){e.stopPropagation();deletePledgeCard(id);};})(card.id);
+    el.appendChild(del);
+    // double-click to edit
+    (function(id){el.ondblclick=function(e){e.stopPropagation();editPledgeCard(id);};})(card.id);
+    // drag to move
+    (function(cobj,elem){
+      elem.addEventListener('mousedown',function(e){
+        if(e.target.classList.contains('pledge-card-del'))return;
+        e.stopPropagation();
+        pledgeDragging=cobj;
+        pledgeDragOff.x=e.clientX/pledgeScale-cobj.x;
+        pledgeDragOff.y=e.clientY/pledgeScale-cobj.y;
+        elem.style.zIndex=100;
+      });
+    })(card,el);
+    canvas.appendChild(el);
+  });
+}
+
+// Canvas pan & zoom
+var pledgeWrap=document.getElementById('pledgeWrap');
+if(pledgeWrap){
+  pledgeWrap.addEventListener('mousedown',function(e){
+    if(pledgeDragging)return;
+    pledgePanning=true;
+    pledgePanStart={x:e.clientX,y:e.clientY,ox:pledgeOffX,oy:pledgeOffY};
+    pledgeWrap.classList.add('panning');
+  });
+  pledgeWrap.addEventListener('wheel',function(e){
+    e.preventDefault();
+    var delta=e.deltaY>0?-0.1:0.1;
+    pledgeScale=Math.min(3,Math.max(0.3,pledgeScale+delta));
+    document.getElementById('pledgeCanvas').style.transform='translate('+pledgeOffX+'px,'+pledgeOffY+'px) scale('+pledgeScale+')';
+  },{passive:false});
+}
+document.addEventListener('mousemove',function(e){
+  if(pledgeDragging){
+    var nx=e.clientX/pledgeScale-pledgeDragOff.x;
+    var ny=e.clientY/pledgeScale-pledgeDragOff.y;
+    pledgeDragging.x=Math.round(nx);pledgeDragging.y=Math.round(ny);
+    var el=document.getElementById(pledgeDragging.id);
+    if(el){el.style.left=pledgeDragging.x+'px';el.style.top=pledgeDragging.y+'px';}
+  }
+  if(pledgePanning&&!pledgeDragging){
+    pledgeOffX=pledgePanStart.ox+(e.clientX-pledgePanStart.x);
+    pledgeOffY=pledgePanStart.oy+(e.clientY-pledgePanStart.y);
+    var canvas=document.getElementById('pledgeCanvas');
+    if(canvas)canvas.style.transform='translate('+pledgeOffX+'px,'+pledgeOffY+'px) scale('+pledgeScale+')';
+  }
+});
+document.addEventListener('mouseup',function(){
+  if(pledgeDragging){savePledge();pledgeDragging=null;}
+  if(pledgePanning){pledgePanning=false;var w=document.getElementById('pledgeWrap');if(w)w.classList.remove('panning');}
+});
+// close modal on backdrop click
+document.getElementById('pledgeModalBack').addEventListener('click',function(e){
+  if(e.target===this)closePledgeModal();
+});
+
+// ── THEME TOGGLE ──
+var isDark = localStorage.getItem('ad_theme') !== 'light';
+function applyTheme(dark){
+  isDark = dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('ttIcon').textContent = dark ? '☀️' : '🌙';
+  document.getElementById('ttLbl').textContent = dark ? 'LIGHT' : 'DARK';
+  localStorage.setItem('ad_theme', dark ? 'dark' : 'light');
+  // Tell all iframes about the theme change
+  ['fr-dayflow','fr-breathe','fr-codetrack'].forEach(function(id){
+    var fr = document.getElementById(id);
+    if(fr && fr.contentWindow){
+      try{ fr.contentWindow.postMessage({type:'theme',dark:dark},'*'); }catch(e){}
+    }
+  });
+}
+function toggleTheme(){ applyTheme(!isDark); }
+applyTheme(isDark);
+</script>
+</body>
+</html>
