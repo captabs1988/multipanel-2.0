@@ -256,47 +256,84 @@ table.tbl input[type=time]:focus{border-bottom-color:var(--accent);background:rg
   </div>
 
   <!-- PLEDGE MODAL -->
-  <div class="pledge-modal-back" id="pledgeModalBack">
-    <div class="pledge-modal">
-      <h3>✦ New Quote Card</h3>
-      <div>
-        <div class="pm-section-lbl" style="margin-bottom:6px;">Shape</div>
-        <div class="pm-shapes" id="pmShapes">
-          <div class="pm-shape sel" data-shape="rect" onclick="selShape(this,'rect')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="4" fill="currentColor" opacity=".7"/></svg></div>
-          <div class="pm-shape" data-shape="round" onclick="selShape(this,'round')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="10" fill="currentColor" opacity=".7"/></svg></div>
-          <div class="pm-shape" data-shape="circle" onclick="selShape(this,'circle')"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="currentColor" opacity=".7"/></svg></div>
-          <div class="pm-shape" data-shape="diamond" onclick="selShape(this,'diamond')"><svg viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="currentColor" opacity=".7"/></svg></div>
-          <div class="pm-shape" data-shape="banner" onclick="selShape(this,'banner')"><svg viewBox="0 0 32 32"><polygon points="2,8 30,8 26,16 30,24 2,24" fill="currentColor" opacity=".7"/></svg></div>
+<div class="pledge-modal">
+        <h3>✦ New Quote Card</h3>
+        <div>
+          <div class="pm-section-lbl" style="margin-bottom:6px;">Shape</div>
+          <div class="pm-shapes" id="pmShapes">
+            <div class="pm-shape sel" data-shape="rect" onclick="selShape(this,'rect')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="4" fill="currentColor" opacity=".7"/></svg></div>
+            <div class="pm-shape" data-shape="round" onclick="selShape(this,'round')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="10" fill="currentColor" opacity=".7"/></svg></div>
+            <div class="pm-shape" data-shape="circle" onclick="selShape(this,'circle')"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="currentColor" opacity=".7"/></svg></div>
+            <div class="pm-shape" data-shape="diamond" onclick="selShape(this,'diamond')"><svg viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="currentColor" opacity=".7"/></svg></div>
+            <div class="pm-shape" data-shape="banner" onclick="selShape(this,'banner')"><svg viewBox="0 0 32 32"><polygon points="2,8 30,8 26,16 30,24 2,24" fill="currentColor" opacity=".7"/></svg></div>
+          </div>
+        </div>
+        <div>
+          <div class="pm-section-lbl" style="margin-bottom:6px;">Box Colour</div>
+          <div class="pm-colors" id="pmColors">
+            <div class="pm-color sel" data-color="#1e2a4a" style="background:#1e2a4a" onclick="selColor(this,'#1e2a4a')"></div>
+            <div class="pm-color" data-color="#2d1b4e" style="background:#2d1b4e" onclick="selColor(this,'#2d1b4e')"></div>
+            <div class="pm-color" data-color="#1a3a2a" style="background:#1a3a2a" onclick="selColor(this,'#1a3a2a')"></div>
+            <div class="pm-color" data-color="#3a1a1a" style="background:#3a1a1a" onclick="selColor(this,'#3a1a1a')"></div>
+            <div class="pm-color" data-color="#2a2a1a" style="background:#2a2a1a" onclick="selColor(this,'#2a2a1a')"></div>
+            <div class="pm-color" data-color="#1a2a3a" style="background:#1a2a3a" onclick="selColor(this,'#1a2a3a')"></div>
+            <div class="pm-color" data-color="#6c8aff" style="background:#6c8aff" onclick="selColor(this,'#6c8aff')"></div>
+            <div class="pm-color" data-color="#a78bfa" style="background:#a78bfa" onclick="selColor(this,'#a78bfa')"></div>
+            <div class="pm-color" data-color="#34d399" style="background:#34d399" onclick="selColor(this,'#34d399')"></div>
+            <div class="pm-color" data-color="#f59e0b" style="background:#f59e0b" onclick="selColor(this,'#f59e0b')"></div>
+            <div class="pm-color" data-color="#f87171" style="background:#f87171" onclick="selColor(this,'#f87171')"></div>
+            <div class="pm-color" data-color="#38bdf8" style="background:#38bdf8" onclick="selColor(this,'#38bdf8')"></div>
+            <div class="pm-color" data-color="#ffffff" style="background:#ffffff;border:1px solid #888" onclick="selColor(this,'#ffffff')"></div>
+            <div class="pm-color" data-color="#000000" style="background:#000000" onclick="selColor(this,'#000000')"></div>
+          </div>
+        </div>
+        <div>
+          <div class="pm-section-lbl" style="margin-bottom:6px;">Text Colour</div>
+          <div class="pm-colors" id="pmTextColors">
+            <div class="pm-color sel" data-color="#e2e8f0" style="background:#e2e8f0" onclick="selTextColor(this,'#e2e8f0')"></div>
+            <div class="pm-color" data-color="#ffffff" style="background:#ffffff;border:1px solid #888" onclick="selTextColor(this,'#ffffff')"></div>
+            <div class="pm-color" data-color="#1a2040" style="background:#1a2040" onclick="selTextColor(this,'#1a2040')"></div>
+            <div class="pm-color" data-color="#6c8aff" style="background:#6c8aff" onclick="selTextColor(this,'#6c8aff')"></div>
+            <div class="pm-color" data-color="#a78bfa" style="background:#a78bfa" onclick="selTextColor(this,'#a78bfa')"></div>
+            <div class="pm-color" data-color="#34d399" style="background:#34d399" onclick="selTextColor(this,'#34d399')"></div>
+            <div class="pm-color" data-color="#f59e0b" style="background:#f59e0b" onclick="selTextColor(this,'#f59e0b')"></div>
+            <div class="pm-color" data-color="#f87171" style="background:#f87171" onclick="selTextColor(this,'#f87171')"></div>
+            <div class="pm-color" data-color="#ffdd00" style="background:#ffdd00" onclick="selTextColor(this,'#ffdd00')"></div>
+            <div class="pm-color" data-color="#000000" style="background:#000000" onclick="selTextColor(this,'#000000')"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div>
+            <div class="pm-section-lbl" style="margin-bottom:6px;">Font</div>
+            <select id="pmFont" style="background:#1e2330;border:1px solid #252b38;color:#e2e8f0;padding:5px 8px;border-radius:6px;font-size:12px;outline:none;cursor:pointer;">
+              <option value="Syne">Syne</option>
+              <option value="JetBrains Mono">Mono</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Impact">Impact</option>
+              <option value="Arial">Arial</option>
+              <option value="cursive">Cursive</option>
+            </select>
+          </div>
+          <div>
+            <div class="pm-section-lbl" style="margin-bottom:6px;">Size</div>
+            <select id="pmFontSize" style="background:#1e2330;border:1px solid #252b38;color:#e2e8f0;padding:5px 8px;border-radius:6px;font-size:12px;outline:none;cursor:pointer;">
+              <option value="11">Small</option>
+              <option value="13" selected>Normal</option>
+              <option value="16">Large</option>
+              <option value="20">XLarge</option>
+              <option value="26">XXLarge</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="pm-section-lbl" style="margin-bottom:6px;">Your Quote / Pledge</div>
+          <textarea class="pm-quote-inp" id="pmQuote" placeholder="Enter your motivational quote or pledge..."></textarea>
+        </div>
+        <div class="pm-actions">
+          <button class="pm-btn" onclick="closePledgeModal()">Cancel</button>
+          <button class="pm-btn primary" onclick="addPledgeCard()">Add Card</button>
         </div>
       </div>
-      <div>
-        <div class="pm-section-lbl" style="margin-bottom:6px;">Colour</div>
-        <div class="pm-colors" id="pmColors">
-          <div class="pm-color sel" data-color="#1e2a4a" style="background:#1e2a4a" onclick="selColor(this,'#1e2a4a')"></div>
-          <div class="pm-color" data-color="#2d1b4e" style="background:#2d1b4e" onclick="selColor(this,'#2d1b4e')"></div>
-          <div class="pm-color" data-color="#1a3a2a" style="background:#1a3a2a" onclick="selColor(this,'#1a3a2a')"></div>
-          <div class="pm-color" data-color="#3a1a1a" style="background:#3a1a1a" onclick="selColor(this,'#3a1a1a')"></div>
-          <div class="pm-color" data-color="#2a2a1a" style="background:#2a2a1a" onclick="selColor(this,'#2a2a1a')"></div>
-          <div class="pm-color" data-color="#1a2a3a" style="background:#1a2a3a" onclick="selColor(this,'#1a2a3a')"></div>
-          <div class="pm-color" data-color="#6c8aff" style="background:#6c8aff" onclick="selColor(this,'#6c8aff')"></div>
-          <div class="pm-color" data-color="#a78bfa" style="background:#a78bfa" onclick="selColor(this,'#a78bfa')"></div>
-          <div class="pm-color" data-color="#34d399" style="background:#34d399" onclick="selColor(this,'#34d399')"></div>
-          <div class="pm-color" data-color="#f59e0b" style="background:#f59e0b" onclick="selColor(this,'#f59e0b')"></div>
-          <div class="pm-color" data-color="#f87171" style="background:#f87171" onclick="selColor(this,'#f87171')"></div>
-          <div class="pm-color" data-color="#38bdf8" style="background:#38bdf8" onclick="selColor(this,'#38bdf8')"></div>
-        </div>
-      </div>
-      <div>
-        <div class="pm-section-lbl" style="margin-bottom:6px;">Your Quote / Pledge</div>
-        <textarea class="pm-quote-inp" id="pmQuote" placeholder="Enter your motivational quote or pledge..."></textarea>
-      </div>
-      <div class="pm-actions">
-        <button class="pm-btn" onclick="closePledgeModal()">Cancel</button>
-        <button class="pm-btn primary" onclick="addPledgeCard()">Add Card</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 // ── TABS ──
@@ -570,7 +607,7 @@ setTimeout(goToday,200);
 // ── PLEDGE PANEL ──
 var PLEDGE_LS='ad_pledge';
 var pledgeCards=[];
-var pmShape='rect',pmColor='#1e2a4a';
+var pmShape='rect',pmColor='#1e2a4a',pmTextColor='#e2e8f0',pmFont='Syne',pmFontSize='13';
 var pledgeScale=1,pledgeOffX=0,pledgeOffY=0;
 var pledgePanning=false,pledgePanStart={x:0,y:0,ox:0,oy:0};
 var pledgeDragging=null,pledgeDragOff={x:0,y:0};
@@ -591,8 +628,12 @@ function selShape(el,shape){
   el.classList.add('sel');pmShape=shape;
 }
 function selColor(el,color){
-  document.querySelectorAll('.pm-color').forEach(function(c){c.classList.remove('sel');});
+  document.querySelectorAll('#pmColors .pm-color').forEach(function(c){c.classList.remove('sel');});
   el.classList.add('sel');pmColor=color;
+}
+function selTextColor(el,color){
+  document.querySelectorAll('#pmTextColors .pm-color').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');pmTextColor=color;
 }
 
 function shapeStyle(shape,color){
@@ -617,14 +658,14 @@ function addPledgeCard(){
   var q=document.getElementById('pmQuote').value.trim();
   if(!q){alert('Please enter a quote or pledge first.');return;}
   var id='pc_'+Date.now();
-  // place in visible area
   var wrap=document.getElementById('pledgeWrap');
   var cx=(wrap.clientWidth/2-pledgeOffX)/pledgeScale-100;
   var cy=(wrap.clientHeight/2-pledgeOffY)/pledgeScale-60;
-  // spread slightly
   cx+=Math.round((Math.random()-0.5)*120);
   cy+=Math.round((Math.random()-0.5)*80);
-  pledgeCards.push({id:id,shape:pmShape,color:pmColor,quote:q,x:Math.round(cx),y:Math.round(cy)});
+  var font=document.getElementById('pmFont').value;
+  var fontSize=document.getElementById('pmFontSize').value;
+  pledgeCards.push({id:id,shape:pmShape,color:pmColor,textColor:pmTextColor,font:font,fontSize:fontSize,quote:q,x:Math.round(cx),y:Math.round(cy),w:200,h:120});
   savePledge();renderPledge();closePledgeModal();
 }
 
@@ -642,7 +683,7 @@ function editPledgeCard(id){
   savePledge();renderPledge();
 }
 
-function renderPledge(){
+function renderPledge()function renderPledge(){
   var canvas=document.getElementById('pledgeCanvas');
   if(!canvas)return;
   canvas.innerHTML='';
@@ -652,25 +693,47 @@ function renderPledge(){
     var el=document.createElement('div');
     el.className='pledge-card';
     el.id=card.id;
-    el.style.cssText=shapeStyle(card.shape,card.color)+'left:'+card.x+'px;top:'+card.y+'px;color:'+textColor(card.color)+';';
-    // diamond: wrap text in inner div to counter-rotate
-    if(card.shape==='diamond'){
-      var inner=document.createElement('div');
-      inner.style.cssText='transform:rotate(-45deg);padding:8px;max-width:100px;word-break:break-word;';
-      inner.textContent=card.quote;el.appendChild(inner);
-    } else {
-      el.textContent=card.quote;
-    }
+
+    var w=card.w||200,h=card.h||120;
+    var baseStyle='left:'+card.x+'px;top:'+card.y+'px;width:'+w+'px;height:'+h+'px;';
+    baseStyle+='background:'+card.color+';';
+    baseStyle+='color:'+(card.textColor||'#e2e8f0')+';';
+    baseStyle+='font-family:'+(card.font||'Syne')+',sans-serif;';
+    baseStyle+='font-size:'+(card.fontSize||13)+'px;';
+
+    if(card.shape==='rect')baseStyle+='border-radius:10px;';
+    else if(card.shape==='round')baseStyle+='border-radius:40px;';
+    else if(card.shape==='circle')baseStyle+='border-radius:50%;';
+    else if(card.shape==='diamond')baseStyle+='transform:rotate(45deg);border-radius:8px;';
+    else if(card.shape==='banner')baseStyle+='border-radius:4px;clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);';
+
+    el.style.cssText=baseStyle;
+
+    var textWrap=document.createElement('div');
+    textWrap.className='card-text';
+    if(card.shape==='diamond'){textWrap.style.transform='rotate(-45deg)';}
+    textWrap.textContent=card.quote;
+    el.appendChild(textWrap);
+
     // delete button
-    var del=document.createElement('button');del.className='pledge-card-del';del.textContent='×';
+    var del=document.createElement('button');
+    del.className='pledge-card-del';del.textContent='×';
     (function(id){del.onclick=function(e){e.stopPropagation();deletePledgeCard(id);};})(card.id);
     el.appendChild(del);
+
+    // resize handle
+    var res=document.createElement('div');
+    res.className='pledge-resize';
+    el.appendChild(res);
+
     // double-click to edit
     (function(id){el.ondblclick=function(e){e.stopPropagation();editPledgeCard(id);};})(card.id);
+
     // drag to move
     (function(cobj,elem){
       elem.addEventListener('mousedown',function(e){
         if(e.target.classList.contains('pledge-card-del'))return;
+        if(e.target.classList.contains('pledge-resize'))return;
         e.stopPropagation();
         pledgeDragging=cobj;
         pledgeDragOff.x=e.clientX/pledgeScale-cobj.x;
@@ -678,6 +741,36 @@ function renderPledge(){
         elem.style.zIndex=100;
       });
     })(card,el);
+
+    // resize handle drag
+    (function(cobj,elem,resEl){
+      var resizing=false,rsX=0,rsY=0,rsW=0,rsH=0;
+      resEl.addEventListener('mousedown',function(e){
+        e.stopPropagation();e.preventDefault();
+        resizing=true;
+        rsX=e.clientX;rsY=e.clientY;
+        rsW=cobj.w||200;rsH=cobj.h||120;
+        document.addEventListener('mousemove',onResizeMove);
+        document.addEventListener('mouseup',onResizeUp);
+      });
+      function onResizeMove(e){
+        if(!resizing)return;
+        var dw=(e.clientX-rsX)/pledgeScale;
+        var dh=(e.clientY-rsY)/pledgeScale;
+        cobj.w=Math.max(100,Math.round(rsW+dw));
+        cobj.h=Math.max(60,Math.round(rsH+dh));
+        elem.style.width=cobj.w+'px';
+        elem.style.height=cobj.h+'px';
+      }
+      function onResizeUp(){
+        if(!resizing)return;
+        resizing=false;
+        savePledge();
+        document.removeEventListener('mousemove',onResizeMove);
+        document.removeEventListener('mouseup',onResizeUp);
+      }
+    })(card,el,res);
+
     canvas.appendChild(el);
   });
 }
