@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AbhiDesk</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <style>
 :root{--bg:#0f1117;--surface:#171b24;--border:#252b38;--accent:#6c8aff;--accent2:#a78bfa;--gold:#f59e0b;--green:#34d399;--text:#e2e8f0;--muted:#64748b;}
 [data-theme="light"]{--bg:#f0f2f8;--surface:#ffffff;--border:#d1d8e8;--accent:#3a5fd9;--accent2:#7c3aed;--gold:#d97706;--green:#059669;--text:#1a2040;--muted:#6b7494;}
@@ -171,26 +172,26 @@ table.tbl input[type=time]:focus{border-bottom-color:var(--accent);background:rg
 </head>
 <body>
 <div class="tab-bar" id="tabBar">
-  <div class="logo">Abhi<span>Desk</span></div>
-  <button class="theme-toggle" onclick="document.getElementById('panelUpload').click()" title="Upload HTML file as new panel">
-    <span class="tt-icon">＋</span><span class="tt-lbl">ADD PANEL</span>
-  </button>
-  <input type="file" id="panelUpload" accept=".html" style="display:none" onchange="addPanelFromFile(this)">
-  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
-    <span class="tt-icon" id="ttIcon">☀️</span><span class="tt-lbl" id="ttLbl">LIGHT</span>
-  </button>
-  <button class="tab active" id="tab-tracker" onclick="switchTab('tracker')" ondblclick="renameTab('tracker')" draggable="true"><span>📊</span><span id="lbl-tracker">2026 Daily Log</span></button>
-  <button class="tab" id="tab-pledge" onclick="switchTab('pledge')" ondblclick="renameTab('pledge')" draggable="true"><span>🔥</span><span id="lbl-pledge">Pledge</span></button>
-  <button class="tab" id="tab-sheet" onclick="switchTab('sheet')" ondblclick="renameTab('sheet')" draggable="true"><span>📋</span><span id="lbl-sheet">Checklist Sheet</span></button>
-  <button class="tab" id="tab-dayflow" onclick="switchTab('dayflow')" ondblclick="renameTab('dayflow')" draggable="true"><span>📅</span><span id="lbl-dayflow">DayFlow</span></button>
-  <button class="tab" id="tab-codetrack" onclick="switchTab('codetrack')" ondblclick="renameTab('codetrack')" draggable="true"><span>💻</span><span id="lbl-codetrack">Code Tracker</span></button>
-  <button class="tab" id="tab-breathe" onclick="switchTab('breathe')" ondblclick="renameTab('breathe')" draggable="true"><span>🫁</span><span id="lbl-breathe">Breathe</span></button>
-  <button class="tab" id="tab-znf" onclick="switchTab('znf')" ondblclick="renameTab('znf')" draggable="true"><span>✈</span><span id="lbl-znf">Zero Noise Flight</span></button>
+<div class="logo">Abhi<span>Desk</span></div>
+<button class="theme-toggle" onclick="document.getElementById('panelUpload').click()" title="Upload HTML file as new panel">
+<span class="tt-icon">＋</span><span class="tt-lbl">ADD PANEL</span>
+</button>
+<input accept=".html" id="panelUpload" onchange="addPanelFromFile(this)" style="display:none" type="file"/>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+<span class="tt-icon" id="ttIcon">☀️</span><span class="tt-lbl" id="ttLbl">LIGHT</span>
+</button>
+<button class="tab active" draggable="true" id="tab-tracker" onclick="switchTab('tracker')" ondblclick="renameTab('tracker')"><span>📊</span><span id="lbl-tracker">2026 Daily Log</span></button>
+<button class="tab" draggable="true" id="tab-pledge" onclick="switchTab('pledge')" ondblclick="renameTab('pledge')"><span>🔥</span><span id="lbl-pledge">Pledge</span></button>
+<button class="tab" draggable="true" id="tab-sheet" onclick="switchTab('sheet')" ondblclick="renameTab('sheet')"><span>📋</span><span id="lbl-sheet">Checklist Sheet</span></button>
+<button class="tab" draggable="true" id="tab-dayflow" onclick="switchTab('dayflow')" ondblclick="renameTab('dayflow')"><span>📅</span><span id="lbl-dayflow">DayFlow</span></button>
+<button class="tab" draggable="true" id="tab-codetrack" onclick="switchTab('codetrack')" ondblclick="renameTab('codetrack')"><span>💻</span><span id="lbl-codetrack">Code Tracker</span></button>
+<button class="tab" draggable="true" id="tab-breathe" onclick="switchTab('breathe')" ondblclick="renameTab('breathe')"><span>🫁</span><span id="lbl-breathe">Breathe</span></button>
+<button class="tab" draggable="true" id="tab-znf" onclick="switchTab('znf')" ondblclick="renameTab('znf')"><span>✈</span><span id="lbl-znf">Zero Noise Flight</span></button>
 </div>
 <div class="panel-area">
-  <div class="panel" id="panel-dayflow"><iframe id="fr-dayflow" title="DayFlow"></iframe></div>
-  <div class="panel" id="panel-breathe"><iframe id="fr-breathe" title="Breathe"></iframe></div>
-  <div class="panel" id="panel-znf">
+<div class="panel" id="panel-dayflow"><iframe id="fr-dayflow" title="DayFlow"></iframe></div>
+<div class="panel" id="panel-breathe"><iframe id="fr-breathe" title="Breathe"></iframe></div>
+<div class="panel" id="panel-znf">
 <style>
 #znf-wrap{height:100%;overflow-y:auto;background:var(--bg);}
 #znf-wrap::-webkit-scrollbar{width:4px;}
@@ -256,200 +257,200 @@ table.tbl input[type=time]:focus{border-bottom-color:var(--accent);background:rg
 .zem{text-align:center;padding:2rem;font-size:12px;color:var(--muted);}
 </style>
 <div id="znf-wrap"><div class="zw">
-  <span class="zt">✈ Zero Noise Flight</span>
-  <span class="zpill zoff" id="znf-pill">STANDBY</span>
-  <div class="zorb-zone">
-    <div class="zring zrc" id="znf-rc"></div>
-    <div class="zring zrb" id="znf-rb"></div>
-    <div class="zring zra" id="znf-ra"></div>
-    <button class="zorb" id="znf-orb" onclick="znfToggle()">
-      <svg viewBox="0 0 44 44" fill="none">
-        <circle cx="22" cy="22" r="18" id="znf-ic" stroke="rgba(226,75,74,0.6)" stroke-width="1.5"/>
-        <rect x="15" y="14" width="6" height="16" rx="3" id="znf-i1" fill="rgba(226,75,74,0.7)"/>
-        <rect x="23" y="14" width="6" height="16" rx="3" id="znf-i2" fill="rgba(226,75,74,0.7)"/>
-      </svg>
-      <span class="zol" id="znf-ol">off</span>
-    </button>
-  </div>
-  <div class="zclk-wrap">
-    <div class="zclk-lbl">session timer</div>
-    <div class="zclk" id="znf-clk">00:00:00</div>
-  </div>
-  <div class="zstats">
-    <div class="zsc"><div class="zsv" id="znf-s1">0m</div><div class="zsl">today on</div></div>
-    <div class="zsc"><div class="zsv" id="znf-s2">0</div><div class="zsl">sessions</div></div>
-    <div class="zsc"><div class="zsv" id="znf-s3">0h</div><div class="zsl">this week</div></div>
-    <div class="zsc"><div class="zsv" id="znf-s4">0</div><div class="zsl">day streak</div></div>
-  </div>
-  <hr class="zhr"/>
-  <div class="zap" id="znf-ap">
-    <div class="zaph">
-      <span class="zapttl">// analytics</span>
-      <button class="zx" onclick="znfCloseA()">×</button>
-    </div>
-    <div class="zvts">
-      <button class="zvt za" onclick="znfView('daily',this)">Day</button>
-      <button class="zvt" onclick="znfView('weekly',this)">Week</button>
-      <button class="zvt" onclick="znfView('monthly',this)">Month</button>
-      <button class="zvt" onclick="znfView('yearly',this)">Year</button>
-    </div>
-    <div class="zleg">
-      <span><span class="zld" style="background:#34d399"></span>On (min)</span>
-      <span><span class="zld" style="background:rgba(226,75,74,.4)"></span>Idle</span>
-    </div>
-    <div class="zcw"><canvas id="znf-ch"></canvas></div>
-  </div>
-  <div class="zls">
-    <div class="zlh">
-      <span class="zlttl">// deep work log</span>
-      <div class="zlac">
-        <button class="zbtn" id="znf-ab" onclick="znfTogA()">Analytics</button>
-        <button class="zbtn" onclick="znfExport()">Export CSV</button>
-      </div>
-    </div>
-    <div class="zll" id="znf-ll"><div class="zem">No sessions yet — tap the orb to begin.</div></div>
-  </div>
+<span class="zt">✈ Zero Noise Flight</span>
+<span class="zpill zoff" id="znf-pill">STANDBY</span>
+<div class="zorb-zone">
+<div class="zring zrc" id="znf-rc"></div>
+<div class="zring zrb" id="znf-rb"></div>
+<div class="zring zra" id="znf-ra"></div>
+<button class="zorb" id="znf-orb" onclick="znfToggle()">
+<svg fill="none" viewbox="0 0 44 44">
+<circle cx="22" cy="22" id="znf-ic" r="18" stroke="rgba(226,75,74,0.6)" stroke-width="1.5"></circle>
+<rect fill="rgba(226,75,74,0.7)" height="16" id="znf-i1" rx="3" width="6" x="15" y="14"></rect>
+<rect fill="rgba(226,75,74,0.7)" height="16" id="znf-i2" rx="3" width="6" x="23" y="14"></rect>
+</svg>
+<span class="zol" id="znf-ol">off</span>
+</button>
+</div>
+<div class="zclk-wrap">
+<div class="zclk-lbl">session timer</div>
+<div class="zclk" id="znf-clk">00:00:00</div>
+</div>
+<div class="zstats">
+<div class="zsc"><div class="zsv" id="znf-s1">0m</div><div class="zsl">today on</div></div>
+<div class="zsc"><div class="zsv" id="znf-s2">0</div><div class="zsl">sessions</div></div>
+<div class="zsc"><div class="zsv" id="znf-s3">0h</div><div class="zsl">this week</div></div>
+<div class="zsc"><div class="zsv" id="znf-s4">0</div><div class="zsl">day streak</div></div>
+</div>
+<hr class="zhr"/>
+<div class="zap" id="znf-ap">
+<div class="zaph">
+<span class="zapttl">// analytics</span>
+<button class="zx" onclick="znfCloseA()">×</button>
+</div>
+<div class="zvts">
+<button class="zvt za" onclick="znfView('daily',this)">Day</button>
+<button class="zvt" onclick="znfView('weekly',this)">Week</button>
+<button class="zvt" onclick="znfView('monthly',this)">Month</button>
+<button class="zvt" onclick="znfView('yearly',this)">Year</button>
+</div>
+<div class="zleg">
+<span><span class="zld" style="background:#34d399"></span>On (min)</span>
+<span><span class="zld" style="background:rgba(226,75,74,.4)"></span>Idle</span>
+</div>
+<div class="zcw"><canvas id="znf-ch"></canvas></div>
+</div>
+<div class="zls">
+<div class="zlh">
+<span class="zlttl">// deep work log</span>
+<div class="zlac">
+<button class="zbtn" id="znf-ab" onclick="znfTogA()">Analytics</button>
+<button class="zbtn" onclick="znfExport()">Export CSV</button>
+</div>
+</div>
+<div class="zll" id="znf-ll"><div class="zem">No sessions yet — tap the orb to begin.</div></div>
+</div>
 </div></div>
 </div>
-  <div class="panel" id="panel-codetrack"><iframe id="fr-codetrack" title="Code Tracker"></iframe></div>
-  <div class="panel active" id="tracker-panel">
-    <div class="toolbar">
-      <h2>// 2026 Daily Log</h2>
-      <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Rating:</span>
-      <select class="tsel" id="rMode" onchange="setRMode(this.value)"><option value="5">&#9733; Stars 1-5</option><option value="10"># Score 1-10</option></select>
-      <button class="tbtn" onclick="doExport()">&#8595; Export CSV</button>
-      <button class="tbtn" onclick="goToday()">&#128205; Today</button>
-      <span class="thint">Double-click tab to rename</span>
-    </div>
-    <div class="t-layout">
-      <div class="sidebar">
-        <span class="sb-title">Quick Actions</span>
-        <button class="prod-btn" onclick="prodStart()">&#128640; Productivity<br>Started!<span class="prod-sub">stamps work start time</span></button>
-        <div class="toast" id="toast"></div>
-        <hr class="sb-hr">
-        <span class="sb-title">This Week</span>
-        <div class="sb-stat"><span class="s-lbl">Gym</span><span class="s-val" id="sg">0</span><span class="s-sub">sessions</span></div>
-        <div class="sb-stat"><span class="s-lbl">Meditation</span><span class="s-val" id="sm">0</span><span class="s-sub">sessions</span></div>
-        <div class="sb-stat"><span class="s-lbl">Avg Rating</span><span class="s-val" id="sa">-</span><span class="s-sub">out of 5</span></div>
-        <hr class="sb-hr">
-        <span class="sb-title">All 2026</span>
-        <div class="sb-stat"><span class="s-lbl">Gym Total</span><span class="s-val" id="sga">0</span><span class="s-sub">days</span></div>
-        <div class="sb-stat"><span class="s-lbl">Days Logged</span><span class="s-val" id="sdl">0</span><span class="s-sub">entries</span></div>
-      </div>
-      <div class="tscroll">
-        <table class="tbl">
-          <thead><tr>
-            <th class="cd">Day / Date</th>
-            <th>Sleep Time</th><th>Wake Up</th><th>Work Start</th><th>Gap</th>
-            <th>Stretches</th><th>Core</th><th>Flexibility</th><th>Gym</th><th>Gym Session</th><th>Meditation</th>
-            <th>Day Rating</th><th>Slept</th>
-          </tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  <div class="panel" id="sheet-panel">
-    <div id="sSetup" class="sheet-setup">
-      <div style="font-size:48px;">&#128203;</div>
-      <h2>Google Sheet Checklist</h2>
-      <p>Paste your Google Sheet <strong>published URL</strong> below.<br>Your checklist loads live inside this panel.</p>
-      <input type="url" id="sUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pubhtml">
-      <button class="lbtn" onclick="loadSheet()">Load Sheet</button>
-      <div class="sheet-hint">In Google Sheets: File > Share > Publish to web > Web page > Copy URL</div>
-    </div>
-    <div id="sLoaded" class="sheet-loaded" style="display:none">
-      <div class="sheet-bar"><span id="sLbl">-</span><button onclick="refreshSheet()">Refresh</button><button onclick="changeSheet()">Change URL</button></div>
-      <iframe id="sFr" style="flex:1;background:#fff;"></iframe>
-    </div>
-  </div>
-  <div class="panel" id="pledge-panel">
-    <div class="pledge-toolbar">
-      <button class="pledge-add-btn" onclick="openPledgeModal()" title="Add quote card">+</button>
-      <h2>// Pledge - Morning Motivation</h2>
-      <button onclick="exportPledge()" style="margin-left:auto;font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#1e2330;color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0;">&#8595; Export Text</button>
-      <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;">Hover card: x=delete, corner=resize, dbl-click=edit</span>
-    </div>
-    <div class="pledge-canvas-wrap" id="pledgeWrap">
-      <div class="pledge-canvas" id="pledgeCanvas"></div>
-    </div>
-  </div>
-  <div class="pledge-modal-back" id="pledgeModalBack">
-    <div class="pledge-modal">
-      <h3>&#10022; New Quote Card</h3>
-      <div>
-        <span class="pm-section-lbl">Shape</span>
-        <div class="pm-shapes" id="pmShapes">
-          <div class="pm-shape sel" data-shape="rect" onclick="selShape(this,'rect')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="4" fill="currentColor" opacity=".8"/></svg></div>
-          <div class="pm-shape" data-shape="round" onclick="selShape(this,'round')"><svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="12" fill="currentColor" opacity=".8"/></svg></div>
-          <div class="pm-shape" data-shape="circle" onclick="selShape(this,'circle')"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="currentColor" opacity=".8"/></svg></div>
-          <div class="pm-shape" data-shape="diamond" onclick="selShape(this,'diamond')"><svg viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="currentColor" opacity=".8"/></svg></div>
-          <div class="pm-shape" data-shape="banner" onclick="selShape(this,'banner')"><svg viewBox="0 0 32 32"><polygon points="2,8 30,8 26,16 30,24 2,24" fill="currentColor" opacity=".8"/></svg></div>
-        </div>
-      </div>
-      <div>
-        <span class="pm-section-lbl">Box Colour</span>
-        <div class="pm-colors" id="pmBgColors">
-          <div class="pm-color sel" data-c="#1e2a4a" style="background:#1e2a4a" onclick="selBgColor(this,'#1e2a4a')"></div>
-          <div class="pm-color" data-c="#2d1b4e" style="background:#2d1b4e" onclick="selBgColor(this,'#2d1b4e')"></div>
-          <div class="pm-color" data-c="#1a3a2a" style="background:#1a3a2a" onclick="selBgColor(this,'#1a3a2a')"></div>
-          <div class="pm-color" data-c="#3a1a1a" style="background:#3a1a1a" onclick="selBgColor(this,'#3a1a1a')"></div>
-          <div class="pm-color" data-c="#6c8aff" style="background:#6c8aff" onclick="selBgColor(this,'#6c8aff')"></div>
-          <div class="pm-color" data-c="#a78bfa" style="background:#a78bfa" onclick="selBgColor(this,'#a78bfa')"></div>
-          <div class="pm-color" data-c="#34d399" style="background:#34d399" onclick="selBgColor(this,'#34d399')"></div>
-          <div class="pm-color" data-c="#f59e0b" style="background:#f59e0b" onclick="selBgColor(this,'#f59e0b')"></div>
-          <div class="pm-color" data-c="#f87171" style="background:#f87171" onclick="selBgColor(this,'#f87171')"></div>
-          <div class="pm-color" data-c="#38bdf8" style="background:#38bdf8" onclick="selBgColor(this,'#38bdf8')"></div>
-          <div class="pm-color" data-c="#000000" style="background:#000000" onclick="selBgColor(this,'#000000')"></div>
-          <div class="pm-color" data-c="#ffffff" style="background:#ffffff;border-color:#999" onclick="selBgColor(this,'#ffffff')"></div>
-        </div>
-      </div>
-      <div>
-        <span class="pm-section-lbl">Text Colour</span>
-        <div class="pm-colors" id="pmTxtColors">
-          <div class="pm-color sel" data-c="#e2e8f0" style="background:#e2e8f0" onclick="selTxtColor(this,'#e2e8f0')"></div>
-          <div class="pm-color" data-c="#ffffff" style="background:#ffffff;border-color:#999" onclick="selTxtColor(this,'#ffffff')"></div>
-          <div class="pm-color" data-c="#1a2040" style="background:#1a2040" onclick="selTxtColor(this,'#1a2040')"></div>
-          <div class="pm-color" data-c="#6c8aff" style="background:#6c8aff" onclick="selTxtColor(this,'#6c8aff')"></div>
-          <div class="pm-color" data-c="#a78bfa" style="background:#a78bfa" onclick="selTxtColor(this,'#a78bfa')"></div>
-          <div class="pm-color" data-c="#34d399" style="background:#34d399" onclick="selTxtColor(this,'#34d399')"></div>
-          <div class="pm-color" data-c="#f59e0b" style="background:#f59e0b" onclick="selTxtColor(this,'#f59e0b')"></div>
-          <div class="pm-color" data-c="#f87171" style="background:#f87171" onclick="selTxtColor(this,'#f87171')"></div>
-          <div class="pm-color" data-c="#ffdd00" style="background:#ffdd00" onclick="selTxtColor(this,'#ffdd00')"></div>
-          <div class="pm-color" data-c="#000000" style="background:#000000" onclick="selTxtColor(this,'#000000')"></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:12px;">
-        <div style="flex:1;"><span class="pm-section-lbl">Font</span>
-          <select class="pm-font-sel" id="pmFont" style="width:100%;">
-            <option value="Syne">Syne</option>
-            <option value="JetBrains Mono">Mono</option>
-            <option value="Georgia,serif">Georgia</option>
-            <option value="Impact,sans-serif">Impact</option>
-            <option value="Arial,sans-serif">Arial</option>
-            <option value="cursive">Cursive</option>
-          </select>
-        </div>
-        <div style="flex:1;"><span class="pm-section-lbl">Size</span>
-          <select class="pm-font-sel" id="pmSize" style="width:100%;">
-            <option value="11">Small</option>
-            <option value="13" selected>Normal</option>
-            <option value="16">Large</option>
-            <option value="20">X-Large</option>
-            <option value="26">XX-Large</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <span class="pm-section-lbl">Your Quote / Pledge</span>
-        <textarea class="pm-quote-inp" id="pmQuote" placeholder="Enter your motivational quote or pledge..."></textarea>
-      </div>
-      <div class="pm-actions">
-        <button class="pm-btn" onclick="closePledgeModal()">Cancel</button>
-        <button class="pm-btn primary" onclick="addPledgeCard()">Add Card</button>
-      </div>
-    </div>
-  </div>
+<div class="panel" id="panel-codetrack"><iframe id="fr-codetrack" title="Code Tracker"></iframe></div>
+<div class="panel active" id="tracker-panel">
+<div class="toolbar">
+<h2>// 2026 Daily Log</h2>
+<span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Rating:</span>
+<select class="tsel" id="rMode" onchange="setRMode(this.value)"><option value="5">★ Stars 1-5</option><option value="10"># Score 1-10</option></select>
+<button class="tbtn" onclick="doExport()">↓ Export CSV</button>
+<button class="tbtn" onclick="goToday()">📍 Today</button>
+<span class="thint">Double-click tab to rename</span>
+</div>
+<div class="t-layout">
+<div class="sidebar">
+<span class="sb-title">Quick Actions</span>
+<button class="prod-btn" onclick="prodStart()">🚀 Productivity<br/>Started!<span class="prod-sub">stamps work start time</span></button>
+<div class="toast" id="toast"></div>
+<hr class="sb-hr"/>
+<span class="sb-title">This Week</span>
+<div class="sb-stat"><span class="s-lbl">Gym</span><span class="s-val" id="sg">0</span><span class="s-sub">sessions</span></div>
+<div class="sb-stat"><span class="s-lbl">Meditation</span><span class="s-val" id="sm">0</span><span class="s-sub">sessions</span></div>
+<div class="sb-stat"><span class="s-lbl">Avg Rating</span><span class="s-val" id="sa">-</span><span class="s-sub">out of 5</span></div>
+<hr class="sb-hr"/>
+<span class="sb-title">All 2026</span>
+<div class="sb-stat"><span class="s-lbl">Gym Total</span><span class="s-val" id="sga">0</span><span class="s-sub">days</span></div>
+<div class="sb-stat"><span class="s-lbl">Days Logged</span><span class="s-val" id="sdl">0</span><span class="s-sub">entries</span></div>
+</div>
+<div class="tscroll">
+<table class="tbl">
+<thead><tr>
+<th class="cd">Day / Date</th>
+<th>Sleep Time</th><th>Wake Up</th><th>Work Start</th><th>Gap</th>
+<th>Stretches</th><th>Core</th><th>Flexibility</th><th>Gym</th><th>Gym Session</th><th>Meditation</th>
+<th>Day Rating</th><th>Slept</th>
+</tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="panel" id="sheet-panel">
+<div class="sheet-setup" id="sSetup">
+<div style="font-size:48px;">📋</div>
+<h2>Google Sheet Checklist</h2>
+<p>Paste your Google Sheet <strong>published URL</strong> below.<br/>Your checklist loads live inside this panel.</p>
+<input id="sUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pubhtml" type="url"/>
+<button class="lbtn" onclick="loadSheet()">Load Sheet</button>
+<div class="sheet-hint">In Google Sheets: File &gt; Share &gt; Publish to web &gt; Web page &gt; Copy URL</div>
+</div>
+<div class="sheet-loaded" id="sLoaded" style="display:none">
+<div class="sheet-bar"><span id="sLbl">-</span><button onclick="refreshSheet()">Refresh</button><button onclick="changeSheet()">Change URL</button></div>
+<iframe id="sFr" style="flex:1;background:#fff;"></iframe>
+</div>
+</div>
+<div class="panel" id="pledge-panel">
+<div class="pledge-toolbar">
+<button class="pledge-add-btn" onclick="openPledgeModal()" title="Add quote card">+</button>
+<h2>// Pledge - Morning Motivation</h2>
+<button onclick="exportPledge()" style="margin-left:auto;font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#1e2330;color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0;">↓ Export Text</button>
+<span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;">Hover card: x=delete, corner=resize, dbl-click=edit</span>
+</div>
+<div class="pledge-canvas-wrap" id="pledgeWrap">
+<div class="pledge-canvas" id="pledgeCanvas"></div>
+</div>
+</div>
+<div class="pledge-modal-back" id="pledgeModalBack">
+<div class="pledge-modal">
+<h3>✦ New Quote Card</h3>
+<div>
+<span class="pm-section-lbl">Shape</span>
+<div class="pm-shapes" id="pmShapes">
+<div class="pm-shape sel" data-shape="rect" onclick="selShape(this,'rect')"><svg viewbox="0 0 32 32"><rect fill="currentColor" height="20" opacity=".8" rx="4" width="28" x="2" y="6"></rect></svg></div>
+<div class="pm-shape" data-shape="round" onclick="selShape(this,'round')"><svg viewbox="0 0 32 32"><rect fill="currentColor" height="20" opacity=".8" rx="12" width="28" x="2" y="6"></rect></svg></div>
+<div class="pm-shape" data-shape="circle" onclick="selShape(this,'circle')"><svg viewbox="0 0 32 32"><circle cx="16" cy="16" fill="currentColor" opacity=".8" r="13"></circle></svg></div>
+<div class="pm-shape" data-shape="diamond" onclick="selShape(this,'diamond')"><svg viewbox="0 0 32 32"><polygon fill="currentColor" opacity=".8" points="16,2 30,16 16,30 2,16"></polygon></svg></div>
+<div class="pm-shape" data-shape="banner" onclick="selShape(this,'banner')"><svg viewbox="0 0 32 32"><polygon fill="currentColor" opacity=".8" points="2,8 30,8 26,16 30,24 2,24"></polygon></svg></div>
+</div>
+</div>
+<div>
+<span class="pm-section-lbl">Box Colour</span>
+<div class="pm-colors" id="pmBgColors">
+<div class="pm-color sel" data-c="#1e2a4a" onclick="selBgColor(this,'#1e2a4a')" style="background:#1e2a4a"></div>
+<div class="pm-color" data-c="#2d1b4e" onclick="selBgColor(this,'#2d1b4e')" style="background:#2d1b4e"></div>
+<div class="pm-color" data-c="#1a3a2a" onclick="selBgColor(this,'#1a3a2a')" style="background:#1a3a2a"></div>
+<div class="pm-color" data-c="#3a1a1a" onclick="selBgColor(this,'#3a1a1a')" style="background:#3a1a1a"></div>
+<div class="pm-color" data-c="#6c8aff" onclick="selBgColor(this,'#6c8aff')" style="background:#6c8aff"></div>
+<div class="pm-color" data-c="#a78bfa" onclick="selBgColor(this,'#a78bfa')" style="background:#a78bfa"></div>
+<div class="pm-color" data-c="#34d399" onclick="selBgColor(this,'#34d399')" style="background:#34d399"></div>
+<div class="pm-color" data-c="#f59e0b" onclick="selBgColor(this,'#f59e0b')" style="background:#f59e0b"></div>
+<div class="pm-color" data-c="#f87171" onclick="selBgColor(this,'#f87171')" style="background:#f87171"></div>
+<div class="pm-color" data-c="#38bdf8" onclick="selBgColor(this,'#38bdf8')" style="background:#38bdf8"></div>
+<div class="pm-color" data-c="#000000" onclick="selBgColor(this,'#000000')" style="background:#000000"></div>
+<div class="pm-color" data-c="#ffffff" onclick="selBgColor(this,'#ffffff')" style="background:#ffffff;border-color:#999"></div>
+</div>
+</div>
+<div>
+<span class="pm-section-lbl">Text Colour</span>
+<div class="pm-colors" id="pmTxtColors">
+<div class="pm-color sel" data-c="#e2e8f0" onclick="selTxtColor(this,'#e2e8f0')" style="background:#e2e8f0"></div>
+<div class="pm-color" data-c="#ffffff" onclick="selTxtColor(this,'#ffffff')" style="background:#ffffff;border-color:#999"></div>
+<div class="pm-color" data-c="#1a2040" onclick="selTxtColor(this,'#1a2040')" style="background:#1a2040"></div>
+<div class="pm-color" data-c="#6c8aff" onclick="selTxtColor(this,'#6c8aff')" style="background:#6c8aff"></div>
+<div class="pm-color" data-c="#a78bfa" onclick="selTxtColor(this,'#a78bfa')" style="background:#a78bfa"></div>
+<div class="pm-color" data-c="#34d399" onclick="selTxtColor(this,'#34d399')" style="background:#34d399"></div>
+<div class="pm-color" data-c="#f59e0b" onclick="selTxtColor(this,'#f59e0b')" style="background:#f59e0b"></div>
+<div class="pm-color" data-c="#f87171" onclick="selTxtColor(this,'#f87171')" style="background:#f87171"></div>
+<div class="pm-color" data-c="#ffdd00" onclick="selTxtColor(this,'#ffdd00')" style="background:#ffdd00"></div>
+<div class="pm-color" data-c="#000000" onclick="selTxtColor(this,'#000000')" style="background:#000000"></div>
+</div>
+</div>
+<div style="display:flex;gap:12px;">
+<div style="flex:1;"><span class="pm-section-lbl">Font</span>
+<select class="pm-font-sel" id="pmFont" style="width:100%;">
+<option value="Syne">Syne</option>
+<option value="JetBrains Mono">Mono</option>
+<option value="Georgia,serif">Georgia</option>
+<option value="Impact,sans-serif">Impact</option>
+<option value="Arial,sans-serif">Arial</option>
+<option value="cursive">Cursive</option>
+</select>
+</div>
+<div style="flex:1;"><span class="pm-section-lbl">Size</span>
+<select class="pm-font-sel" id="pmSize" style="width:100%;">
+<option value="11">Small</option>
+<option selected="" value="13">Normal</option>
+<option value="16">Large</option>
+<option value="20">X-Large</option>
+<option value="26">XX-Large</option>
+</select>
+</div>
+</div>
+<div>
+<span class="pm-section-lbl">Your Quote / Pledge</span>
+<textarea class="pm-quote-inp" id="pmQuote" placeholder="Enter your motivational quote or pledge..."></textarea>
+</div>
+<div class="pm-actions">
+<button class="pm-btn" onclick="closePledgeModal()">Cancel</button>
+<button class="pm-btn primary" onclick="addPledgeCard()">Add Card</button>
+</div>
+</div>
+</div>
 </div>
 <script>
 var APP_URIS = {
@@ -574,8 +575,7 @@ TABS.forEach(function(id){var v=localStorage.getItem('adlbl_'+id);if(v)document.
   window.znfExport=function(){
     if(!_S.length){alert('No sessions yet.');return;}
     var rows=['Date,Start,End,Duration(min)'].concat(_S.map(function(s){var st=new Date(s.start),en=new Date(s.end);return zfD(st)+','+zfT(st)+','+zfT(en)+','+(s.dur/60000).toFixed(2);}));
-    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('
-')],{type:'text/csv'}));a.download='znf_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='znf_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
   };
   function _zchart(){
     if(typeof Chart==='undefined')return;
@@ -626,20 +626,14 @@ function deletePanel(){
   var list=visible.map(function(t,i){
     var lbl=document.getElementById('lbl-'+t);
     return (i+1)+'. '+(lbl?lbl.textContent:t);
-  }).join('
-');
-  var sel=prompt('Which panel to hide?
-
-'+list+'
-
-Enter number:');
+  }).join('\n');
+  var sel=prompt('Which panel to hide?\n\n'+list+'\n\nEnter number:');
   if(sel===null)return;
   var idx=parseInt(sel)-1;
   if(isNaN(idx)||idx<0||idx>=visible.length){alert('Invalid.');return;}
   var tid=visible[idx];
   var lbl=document.getElementById('lbl-'+tid);
-  if(!confirm('Hide "'+(lbl?lbl.textContent:tid)+'"?
-Persists across refresh.'))return;
+  if(!confirm('Hide "'+(lbl?lbl.textContent:tid)+'"?\nPersists across refresh.'))return;
   _hidden.push(tid);
   localStorage.setItem('ad_hidden',JSON.stringify(_hidden));
   _applyHidden();
